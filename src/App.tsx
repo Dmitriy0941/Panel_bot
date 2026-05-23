@@ -50,7 +50,6 @@ export default function App() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // API Live connection states
   const [useRealApi, setUseRealApi] = useState<boolean>(() => {
     const stored = localStorage.getItem("use_real_api");
     return stored === null ? true : stored === "true";
@@ -80,26 +79,23 @@ export default function App() {
         setUsers(liveUsers);
         setIsRealConnected(true);
       } else {
-        throw new Error(`Не удалось связаться с сервером по адресу "${activeUrl}". Проверьте запущен ли admin_api.py и настроен ли SSL/CORS.`);
+        throw new Error(`Не удалось связаться с сервером по адресу ${activeUrl}. Проверьте запущен ли admin_api.py и настроен ли SSL/CORS.`);
       }
     } catch (err: any) {
       console.error("API error details:", err);
       setIsRealConnected(false);
       setApiError(err.message || "Ошибка подключения. Невозможно загрузить участников.");
-      // Fallback to local storage so dashboard stays operational
       setUsers(loadUsersFromStorage());
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Keep use_real_api setting synced
   useEffect(() => {
     localStorage.setItem("use_real_api", String(useRealApi));
     loadBotData();
   }, [useRealApi]);
 
-  // Clean login token validation at start
   useEffect(() => {
     const token = localStorage.getItem("bot_admin_token");
     if (token) {
@@ -126,7 +122,6 @@ export default function App() {
     setEndDate("");
   };
 
-  // Save changes to appropriate driver
   const handleUpdateUsersList = (updatedUsers: BotUser[]) => {
     setUsers(updatedUsers);
     if (!useRealApi || !isRealConnected) {
@@ -135,7 +130,6 @@ export default function App() {
   };
 
   const handleImportSuccess = async (importedUsers: BotUser[]) => {
-    // Merge new users by checking UID duplicates
     const existingUids = users.map(u => u.user_id);
     const uniqueImported = importedUsers.filter(u => !existingUids.includes(u.user_id));
     
@@ -150,7 +144,7 @@ export default function App() {
       try {
         setIsLoading(true);
         await importUsersReal(uniqueImported);
-        await loadBotData(); // re-sync from server sqlite
+        await loadBotData(); 
       } catch (err: any) {
         alert("Ошибка импорта на живой сервер: " + err.message);
         handleUpdateUsersList(merged);
@@ -167,7 +161,6 @@ export default function App() {
     if (!targetUser) return;
     const newActiveState = !targetUser.is_active;
 
-    // Optimistically toggle in UI
     const updated = users.map(u => u.id === id ? { ...u, is_active: newActiveState } : u);
     setUsers(updated);
 
@@ -176,7 +169,6 @@ export default function App() {
         await toggleUserActiveReal(targetUser.id, targetUser.user_id, newActiveState);
       } catch (err: any) {
         alert("Ошибка переключения статуса на VPS сервере: " + err.message);
-        // rollback
         loadBotData();
       }
     } else {
@@ -192,7 +184,6 @@ export default function App() {
       return;
     }
 
-    // Optimistic delete
     const filtered = users.filter(u => u.id !== id);
     setUsers(filtered);
     if (selectedUser?.id === id) {
@@ -204,7 +195,7 @@ export default function App() {
         await deleteUserReal(targetUser.id, targetUser.user_id);
       } catch (err: any) {
         alert("Ошибка удаления на VPS сервере: " + err.message);
-        loadBotData(); // rollback
+        loadBotData(); 
       }
     } else {
       saveUsersToStorage(filtered);
@@ -212,7 +203,6 @@ export default function App() {
   };
 
   const handleUpdateUserInModal = async (updatedUser: BotUser) => {
-    // Only local modal visual edits, or full save
     const updated = users.map(u => u.id === updatedUser.id ? updatedUser : u);
     setUsers(updated);
     setSelectedUser(updatedUser);
@@ -221,7 +211,6 @@ export default function App() {
       try {
         await toggleUserActiveReal(updatedUser.id, updatedUser.user_id, updatedUser.is_active);
       } catch (e) {
-        // quiet rollback or alert
       }
     } else {
       saveUsersToStorage(updated);
@@ -242,24 +231,25 @@ export default function App() {
     await loadBotData();
   };
 
-  // Compute stats on fly
   const dashboardStats = calculateStats(users, startDate, endDate);
 
-  // Friendly names helper for visual progression charts
+  // Наш обновленный электронный словарик
   const getTagDescription = (tag: string) => {
-    switch (tag) {
-      case "money_and_succes": return "Медитация «Деньги и успех»";
-      case "ideal_day": return "Медитация «Идеальный день»";
-      case "little_step": return "Гайд «Реальная магия маленьких шагов»";
-      case "energy": return "Гайд «Почему у вас нет энергии»";
-      default: return tag;
-    }
+    if (tag === "chain_money_meditation") return "Медитация Деньги и успех";
+    if (tag === "received_chain_money_meditation") return "Старт: Медитация Деньги";
+    if (tag === "chain_energy") return "Гайд Почему нет энергии";
+    if (tag === "received_chain_energy") return "Старт: Гайд Энергия";
+    if (tag === "chain_little_step") return "Гайд Магия маленьких шагов";
+    if (tag === "received_chain_little_step") return "Старт: Гайд Шаги";
+    if (tag === "chain_ideal_day") return "Медитация Идеальный день";
+    if (tag === "received_chain_ideal_day") return "Старт: Идеальный день";
+    if (tag === "received_lead") return "Новый посетитель";
+    return tag;
   };
 
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-[#030014] text-white flex flex-col justify-between relative overflow-hidden">
-        {/* Glow ambient lines */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
         
         <div className="flex-1 flex items-center justify-center p-4">
@@ -274,15 +264,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#030014] text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Glow glowing bg layers */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-indigo-500/10 via-sky-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
       <div className="absolute right-0 bottom-0 w-80 h-80 rounded-full bg-purple-500/5 blur-3xl pointer-events-none -z-10" />
 
-      {/* Top Header navbar */}
       <header className="bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           
-          {/* Logo */}
           <div className="flex items-center gap-3">
             <div className="bg-gradient-to-r from-indigo-500 to-sky-500 p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center">
               <Bot className="w-5 h-5" />
@@ -298,7 +285,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Action buttons */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowMailingModal(true)}
@@ -320,10 +306,8 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Content Space */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
         
-        {/* Header and general animation framework */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -342,7 +326,6 @@ export default function App() {
           </p>
         </motion.div>
 
-        {/* Real-time Server Connection Diagnostic & Settings Panel */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -353,7 +336,6 @@ export default function App() {
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             
-            {/* Left: Current connection status badge */}
             <div className="flex items-start sm:items-center gap-3">
               <div className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
                 !useRealApi 
@@ -405,9 +387,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Right side: Action triggers */}
             <div className="flex flex-wrap items-center gap-2.5 sm:self-center shrink-0">
-              {/* Toggle real status vs fake status */}
               <button
                 type="button"
                 onClick={() => setUseRealApi(!useRealApi)}
@@ -420,7 +400,6 @@ export default function App() {
                 {useRealApi ? "Перейти на Демо-режим" : "Включить Живую VPS"}
               </button>
 
-              {/* Refresh icon */}
               {useRealApi && (
                 <button
                   onClick={loadBotData}
@@ -432,7 +411,6 @@ export default function App() {
                 </button>
               )}
 
-              {/* Configure URL settings */}
               <button
                 onClick={() => setShowConfigPanel(!showConfigPanel)}
                 className={`p-2 border rounded-xl transition-all cursor-pointer duration-150 flex items-center justify-center gap-1.5 text-xs font-bold ${
@@ -447,7 +425,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Diagnostic Details block for Server Connection */}
           <AnimatePresence>
             {useRealApi && isRealConnected === false && apiError && (
               <motion.div
@@ -475,7 +452,6 @@ export default function App() {
             )}
           </AnimatePresence>
 
-          {/* Collapsible Connection URL Config form panel */}
           <AnimatePresence>
             {showConfigPanel && (
               <motion.form 
@@ -532,7 +508,6 @@ export default function App() {
 
         </motion.div>
 
-        {/* Stats Cards Section */}
         <StatsGrid 
           stats={dashboardStats}
           startDate={startDate}
@@ -543,13 +518,10 @@ export default function App() {
           onResetDates={handleResetDates}
         />
 
-        {/* Middle Section: Side-by-side Columns Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          {/* Left Column: Stack of three stats cards */}
           <div className="flex flex-col gap-4 lg:col-span-1">
             
-            {/* Total Users */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -567,7 +539,6 @@ export default function App() {
               </div>
             </motion.div>
 
-            {/* Active Users */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -585,7 +556,6 @@ export default function App() {
               </div>
             </motion.div>
 
-            {/* Unsubscribed Blocked Users */}
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -605,7 +575,6 @@ export default function App() {
 
           </div>
 
-          {/* Right Column: Funnels Distribution Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -634,6 +603,13 @@ export default function App() {
                   .map(t => {
                     const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 105);
                     const safePercentage = Math.min(percentage, 100);
+                    
+                    // Наша новая палитра красок
+                    const barGradient = t.tag.includes("money") ? "from-emerald-400 to-teal-500" :
+                                        t.tag.includes("ideal") ? "from-indigo-400 to-purple-500" :
+                                        t.tag.includes("step") ? "from-amber-400 to-orange-500" :
+                                        t.tag.includes("energy") ? "from-pink-400 to-fuchsia-500" : "from-sky-400 to-blue-500";
+
                     return (
                       <div key={t.tag} className="space-y-1.5">
                         <div className="flex justify-between items-center text-xs">
@@ -644,18 +620,12 @@ export default function App() {
                           </div>
                         </div>
                         
-                        {/* Visual Progress Bar */}
                         <div className="w-full bg-white/5 rounded-full h-2 ring-1 ring-white/10 overflow-hidden">
                           <motion.div 
                             initial={{ width: 0 }}
                             animate={{ width: `${safePercentage}%` }}
                             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                            className={`h-full rounded-full bg-gradient-to-r ${
-                              t.tag === "money_and_succes" ? "from-emerald-400 to-teal-500" :
-                              t.tag === "ideal_day" ? "from-indigo-400 to-purple-500" :
-                              t.tag === "little_step" ? "from-amber-400 to-orange-500" :
-                              t.tag === "energy" ? "from-pink-400 to-fuchsia-500" : "from-sky-400 to-blue-500"
-                            }`}
+                            className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
                           ></motion.div>
                         </div>
                       </div>
@@ -665,19 +635,17 @@ export default function App() {
             </div>
 
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4.5 text-xs text-white/50 mt-4 leading-relaxed relative z-10 w-full shrink-0">
-              💡 <b>Как это работает:</b> При заполнении форм на Tilda, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает "Старт" в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
+              💡 <b>Как это работает:</b> При заполнении форм на Tilda, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает Старт в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
             </div>
           </motion.div>
 
         </div>
 
-        {/* CSV Import/Export Controls */}
         <ImportExport 
           users={users}
           onImportSuccess={handleImportSuccess}
         />
 
-        {/* Primary list Table of users */}
         <UsersTable 
           users={users}
           onSelectUser={setSelectedUser}
@@ -687,7 +655,6 @@ export default function App() {
 
       </main>
 
-      {/* Footer copyright */}
       <footer className="bg-black/40 backdrop-blur-md border-t border-white/10 py-6 text-center text-xs text-white/40 mt-12 shrink-0">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <span>Панель администрирования бота Money Migel © 2026.</span>
@@ -698,7 +665,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Modals popup overlays */}
       {selectedUser && (
         <UserModal 
           user={selectedUser}
