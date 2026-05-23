@@ -1,0 +1,6 @@
+{
+  "name": "Money Migel Bot Admin",
+  "description": "Панель управления Telegram-ботом воронки лид-магнитов Money Migel.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
