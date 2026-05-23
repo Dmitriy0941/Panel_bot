@@ -233,19 +233,23 @@ export default function App() {
 
   const dashboardStats = calculateStats(users, startDate, endDate);
 
-  // Наш обновленный электронный словарик
   const getTagDescription = (tag: string) => {
     if (tag === "chain_money_meditation") return "Медитация Деньги и успех";
-    if (tag === "received_chain_money_meditation") return "Старт: Медитация Деньги";
     if (tag === "chain_energy") return "Гайд Почему нет энергии";
-    if (tag === "received_chain_energy") return "Старт: Гайд Энергия";
     if (tag === "chain_little_step") return "Гайд Магия маленьких шагов";
-    if (tag === "received_chain_little_step") return "Старт: Гайд Шаги";
     if (tag === "chain_ideal_day") return "Медитация Идеальный день";
-    if (tag === "received_chain_ideal_day") return "Старт: Идеальный день";
-    if (tag === "received_lead") return "Новый посетитель";
     return tag;
   };
+
+  // Наше строгое сито для нужных полосок
+  const ALLOWED_TAGS = [
+    "chain_money_meditation",
+    "chain_energy",
+    "chain_little_step",
+    "chain_ideal_day"
+  ];
+  
+  const filteredTagsForCharts = dashboardStats.tags.filter(t => ALLOWED_TAGS.includes(t.tag));
 
   if (!isLoggedIn) {
     return (
@@ -595,47 +599,44 @@ export default function App() {
             </div>
 
             <div className="space-y-4 relative z-10 my-4 flex-1">
-              {dashboardStats.tags.filter(t => t.tag !== "received_lead").length === 0 ? (
-                <div className="text-center py-8 text-xs text-white/40 italic">Теги не найдены в отфильтрованой базе данных</div>
+              {filteredTagsForCharts.length === 0 ? (
+                <div className="text-center py-8 text-xs text-white/40 italic">Основные теги не найдены в базе данных</div>
               ) : (
-                dashboardStats.tags
-                  .filter(t => t.tag !== "received_lead")
-                  .map(t => {
-                    const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 105);
-                    const safePercentage = Math.min(percentage, 100);
-                    
-                    // Наша новая палитра красок
-                    const barGradient = t.tag.includes("money") ? "from-emerald-400 to-teal-500" :
-                                        t.tag.includes("ideal") ? "from-indigo-400 to-purple-500" :
-                                        t.tag.includes("step") ? "from-amber-400 to-orange-500" :
-                                        t.tag.includes("energy") ? "from-pink-400 to-fuchsia-500" : "from-sky-400 to-blue-500";
+                filteredTagsForCharts.map(t => {
+                  const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 105);
+                  const safePercentage = Math.min(percentage, 100);
+                  
+                  const barGradient = t.tag.includes("money") ? "from-emerald-400 to-teal-500" :
+                                      t.tag.includes("ideal") ? "from-indigo-400 to-purple-500" :
+                                      t.tag.includes("step") ? "from-amber-400 to-orange-500" :
+                                      t.tag.includes("energy") ? "from-pink-400 to-fuchsia-500" : "from-sky-400 to-blue-500";
 
-                    return (
-                      <div key={t.tag} className="space-y-1.5">
-                        <div className="flex justify-between items-center text-xs">
-                          <span className="font-semibold text-white/80">{getTagDescription(t.tag)}</span>
-                          <div className="flex items-center gap-1.5 font-bold">
-                            <span className="text-white/40 font-mono">({t.count} чел.)</span>
-                            <span className="text-sky-300 font-bold font-mono">{safePercentage}%</span>
-                          </div>
-                        </div>
-                        
-                        <div className="w-full bg-white/5 rounded-full h-2 ring-1 ring-white/10 overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${safePercentage}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                            className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
-                          ></motion.div>
+                  return (
+                    <div key={t.tag} className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-semibold text-white/80">{getTagDescription(t.tag)}</span>
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span className="text-white/40 font-mono">({t.count} чел.)</span>
+                          <span className="text-sky-300 font-bold font-mono">{safePercentage}%</span>
                         </div>
                       </div>
-                    );
-                  })
+                      
+                      <div className="w-full bg-white/5 rounded-full h-2 ring-1 ring-white/10 overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${safePercentage}%` }}
+                          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                          className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
+                        ></motion.div>
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
 
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4.5 text-xs text-white/50 mt-4 leading-relaxed relative z-10 w-full shrink-0">
-              💡 <b>Как это работает:</b> При заполнении форм на Tilda, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает Старт в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
+              💡 <b>Как это работает:</b> При заполнении форм на Tilda, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает кнопку запуска в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
             </div>
           </motion.div>
 
