@@ -6,13 +6,16 @@
 import React, { useState } from "react";
 import { X, Send, CheckCircle, Volume2, Info, Loader2 } from "lucide-react";
 import { BotUser } from "../types";
+import { sendMailingReal } from "../api";
 
 interface MailingModalProps {
   users: BotUser[];
   onClose: () => void;
+  useRealApi?: boolean;
+  isRealConnected?: boolean;
 }
 
-export default function MailingModal({ users, onClose }: MailingModalProps) {
+export default function MailingModal({ users, onClose, useRealApi = false, isRealConnected = false }: MailingModalProps) {
   const [selectedTag, setSelectedTag] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -36,7 +39,7 @@ export default function MailingModal({ users, onClose }: MailingModalProps) {
 
   const activeUsersCount = users.filter(u => u.is_active).length;
 
-  const handleStartMailing = (e: React.FormEvent) => {
+  const handleStartMailing = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
@@ -55,18 +58,41 @@ export default function MailingModal({ users, onClose }: MailingModalProps) {
     setSending(true);
     setProgress({ current: 0, total: recipients.length });
 
-    // Simulate sending interval over-time for a nice feeling of high scale bulk broadcast in real-time
-    let index = 0;
-    const interval = setInterval(() => {
-      index++;
-      setProgress({ current: index, total: recipients.length });
-
-      if (index >= recipients.length) {
-        clearInterval(interval);
+    if (useRealApi && isRealConnected) {
+      try {
+        // Send real REST API call to fastapi server (admin_api.py)
+        await sendMailingReal(selectedTag, message);
+        
+        // Progress bar simulation for UX
+        let index = 0;
+        const interval = setInterval(() => {
+          index += Math.ceil(recipients.length / 8) || 1;
+          if (index >= recipients.length) {
+            index = recipients.length;
+            clearInterval(interval);
+            setSending(false);
+            setCompleted(true);
+          }
+          setProgress({ current: index, total: recipients.length });
+        }, 110);
+      } catch (err: any) {
         setSending(false);
-        setCompleted(true);
+        alert(`Не удалось запустить рассылку на сервере: ${err.message}`);
       }
-    }, 120); // 120ms dispatch lag
+    } else {
+      // Simulate sending interval over-time for a nice feeling of high scale bulk broadcast in real-time
+      let index = 0;
+      const interval = setInterval(() => {
+        index++;
+        setProgress({ current: index, total: recipients.length });
+
+        if (index >= recipients.length) {
+          clearInterval(interval);
+          setSending(false);
+          setCompleted(true);
+        }
+      }, 120); // 120ms dispatch lag
+    }
   };
 
   const getTagFriendlyName = (tag: string) => {

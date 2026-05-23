@@ -6,6 +6,7 @@
 import React, { useState } from "react";
 import { Lock, User, Eye, EyeOff, Bot, ArrowRight, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
+import { loginReal } from "../api";
 
 interface LoginScreenProps {
   onLoginSuccess: () => void;
@@ -18,25 +19,38 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Simulate backend call
-    setTimeout(() => {
-      if (
-        (username.trim() === "admin" && password === "admin123") ||
-        (username.trim().toLowerCase() === "katya" && password === "migel2026")
-      ) {
-        localStorage.setItem("bot_admin_token", "mock_jwt_token_" + Math.random().toString(36).substring(7));
+    const isRealApi = localStorage.getItem("use_real_api") === "true";
+
+    if (isRealApi) {
+      try {
+        await loginReal(username, password);
         setLoading(false);
         onLoginSuccess();
-      } else {
+      } catch (err: any) {
         setLoading(false);
-        setError("Неверный логин или пароль. Попробуйте admin / admin123");
+        setError("Ошибка авторизации на сервере VPS: " + err.message);
       }
-    }, 600);
+    } else {
+      // Simulate backend call
+      setTimeout(() => {
+        if (
+          (username.trim() === "admin" && password === "admin123") ||
+          (username.trim().toLowerCase() === "katya" && password === "migel2026")
+        ) {
+          localStorage.setItem("bot_admin_token", "mock_jwt_token_" + Math.random().toString(36).substring(7));
+          setLoading(false);
+          onLoginSuccess();
+        } else {
+          setLoading(false);
+          setError("Неверный логин или пароль. Попробуйте admin / admin123");
+        }
+      }, 600);
+    }
   };
 
   const handleQuickDemo = () => {

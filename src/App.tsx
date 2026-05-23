@@ -13,12 +13,27 @@ import {
   Compass,
   Users,
   ShieldCheck,
-  UserMinus
+  UserMinus,
+  Wifi,
+  WifiOff,
+  Database,
+  Settings,
+  RefreshCw,
+  AlertCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
 import { BotUser, DashboardStats } from "./types";
 import { loadUsersFromStorage, saveUsersToStorage, calculateStats } from "./mockData";
+import { 
+  getApiBaseUrl, 
+  setApiBaseUrl, 
+  testConnection, 
+  fetchUsersReal, 
+  toggleUserActiveReal, 
+  deleteUserReal, 
+  importUsersReal 
+} from "./api";
 
 import LoginScreen from "./components/LoginScreen";
 import StatsGrid from "./components/StatsGrid";
@@ -35,19 +50,66 @@ export default function App() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  // API Live connection states
+  const [useRealApi, setUseRealApi] = useState<boolean>(() => {
+    const stored = localStorage.getItem("use_real_api");
+    return stored === null ? true : stored === "true";
+  });
+  const [isRealConnected, setIsRealConnected] = useState<boolean | null>(null);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [apiUrl, setApiUrl] = useState<string>(getApiBaseUrl());
+  const [showConfigPanel, setShowConfigPanel] = useState(false);
+
+  const loadBotData = async () => {
+    setIsLoading(true);
+    setApiError(null);
+    
+    if (!useRealApi) {
+      setUsers(loadUsersFromStorage());
+      setIsRealConnected(false);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const activeUrl = getApiBaseUrl();
+      const isOk = await testConnection(activeUrl);
+      if (isOk) {
+        const liveUsers = await fetchUsersReal();
+        setUsers(liveUsers);
+        setIsRealConnected(true);
+      } else {
+        throw new Error(`Не удалось связаться с сервером по адресу "${activeUrl}". Проверьте запущен ли admin_api.py и настроен ли SSL/CORS.`);
+      }
+    } catch (err: any) {
+      console.error("API error details:", err);
+      setIsRealConnected(false);
+      setApiError(err.message || "Ошибка подключения. Невозможно загрузить участников.");
+      // Fallback to local storage so dashboard stays operational
+      setUsers(loadUsersFromStorage());
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Keep use_real_api setting synced
+  useEffect(() => {
+    localStorage.setItem("use_real_api", String(useRealApi));
+    loadBotData();
+  }, [useRealApi]);
+
   // Clean login token validation at start
   useEffect(() => {
     const token = localStorage.getItem("bot_admin_token");
     if (token) {
       setIsLoggedIn(true);
     }
-    // Load initial bot users
-    setUsers(loadUsersFromStorage());
   }, []);
 
   const handleLoginSuccess = () => {
     setIsLoggedIn(true);
-    setUsers(loadUsersFromStorage());
+    loadBotData();
   };
 
   const handleLogout = () => {
@@ -56,7 +118,7 @@ export default function App() {
   };
 
   const handleRefreshData = () => {
-    setUsers(loadUsersFromStorage());
+    loadBotData();
   };
 
   const handleResetDates = () => {
@@ -64,13 +126,15 @@ export default function App() {
     setEndDate("");
   };
 
-  // User state controllers
+  // Save changes to appropriate driver
   const handleUpdateUsersList = (updatedUsers: BotUser[]) => {
     setUsers(updatedUsers);
-    saveUsersToStorage(updatedUsers);
+    if (!useRealApi || !isRealConnected) {
+      saveUsersToStorage(updatedUsers);
+    }
   };
 
-  const handleImportSuccess = (importedUsers: BotUser[]) => {
+  const handleImportSuccess = async (importedUsers: BotUser[]) => {
     // Merge new users by checking UID duplicates
     const existingUids = users.map(u => u.user_id);
     const uniqueImported = importedUsers.filter(u => !existingUids.includes(u.user_id));
@@ -81,26 +145,101 @@ export default function App() {
     }
 
     const merged = [...uniqueImported, ...users];
-    handleUpdateUsersList(merged);
-  };
-
-  const handleToggleStatus = (id: string) => {
-    const updated = users.map(u => u.id === id ? { ...u, is_active: !u.is_active } : u);
-    handleUpdateUsersList(updated);
-  };
-
-  const handleDeleteUser = (id: string) => {
-    const filtered = users.filter(u => u.id !== id);
-    handleUpdateUsersList(filtered);
-    if (selectedUser?.id === id) {
-      setSelectedUser(null);
+    
+    if (useRealApi && isRealConnected) {
+      try {
+        setIsLoading(true);
+        await importUsersReal(uniqueImported);
+        await loadBotData(); // re-sync from server sqlite
+      } catch (err: any) {
+        alert("Ошибка импорта на живой сервер: " + err.message);
+        handleUpdateUsersList(merged);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      handleUpdateUsersList(merged);
     }
   };
 
-  const handleUpdateUserInModal = (updatedUser: BotUser) => {
+  const handleToggleStatus = async (id: string) => {
+    const targetUser = users.find(u => u.id === id);
+    if (!targetUser) return;
+    const newActiveState = !targetUser.is_active;
+
+    // Optimistically toggle in UI
+    const updated = users.map(u => u.id === id ? { ...u, is_active: newActiveState } : u);
+    setUsers(updated);
+
+    if (useRealApi && isRealConnected) {
+      try {
+        await toggleUserActiveReal(targetUser.id, targetUser.user_id, newActiveState);
+      } catch (err: any) {
+        alert("Ошибка переключения статуса на VPS сервере: " + err.message);
+        // rollback
+        loadBotData();
+      }
+    } else {
+      saveUsersToStorage(updated);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    const targetUser = users.find(u => u.id === id);
+    if (!targetUser) return;
+
+    if (!confirm(`Вы действительно хотите безвозвратно удалить пользователя ${targetUser.first_name || targetUser.user_id} из базы бота?`)) {
+      return;
+    }
+
+    // Optimistic delete
+    const filtered = users.filter(u => u.id !== id);
+    setUsers(filtered);
+    if (selectedUser?.id === id) {
+      setSelectedUser(null);
+    }
+
+    if (useRealApi && isRealConnected) {
+      try {
+        await deleteUserReal(targetUser.id, targetUser.user_id);
+      } catch (err: any) {
+        alert("Ошибка удаления на VPS сервере: " + err.message);
+        loadBotData(); // rollback
+      }
+    } else {
+      saveUsersToStorage(filtered);
+    }
+  };
+
+  const handleUpdateUserInModal = async (updatedUser: BotUser) => {
+    // Only local modal visual edits, or full save
     const updated = users.map(u => u.id === updatedUser.id ? updatedUser : u);
-    handleUpdateUsersList(updated);
+    setUsers(updated);
     setSelectedUser(updatedUser);
+
+    if (useRealApi && isRealConnected) {
+      try {
+        await toggleUserActiveReal(updatedUser.id, updatedUser.user_id, updatedUser.is_active);
+      } catch (e) {
+        // quiet rollback or alert
+      }
+    } else {
+      saveUsersToStorage(updated);
+    }
+  };
+
+  const handleSaveApiBaseUrl = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setApiBaseUrl(apiUrl);
+    await loadBotData();
+  };
+
+  const handleResetToDefaultUrl = async () => {
+    localStorage.removeItem("custom_api_url");
+    const val = getApiBaseUrl();
+    setApiUrl(val);
+    await loadBotData();
   };
 
   // Compute stats on fly
@@ -201,6 +340,196 @@ export default function App() {
           <p className="mx-auto mt-3 max-w-xl text-xs sm:text-sm text-white/60 font-normal">
             Интегрированная база данных потенциальных клиентов, пришедших по вебхукам с мини-лендингов Tilda в ваш Python-бот
           </p>
+        </motion.div>
+
+        {/* Real-time Server Connection Diagnostic & Settings Panel */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="bg-white/[0.03] ring-1 ring-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md overflow-hidden relative"
+        >
+          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-indigo-500/5 blur-2xl pointer-events-none"></div>
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            {/* Left: Current connection status badge */}
+            <div className="flex items-start sm:items-center gap-3">
+              <div className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
+                !useRealApi 
+                  ? "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20"
+                  : isRealConnected === true
+                  ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20"
+                  : isRealConnected === false
+                  ? "bg-rose-500/10 text-rose-400 ring-1 ring-rose-500/20 animate-pulse"
+                  : "bg-white/10 text-white/50 ring-1 ring-white/10"
+              }`}>
+                {isLoading ? (
+                  <RefreshCw className="w-5 h-5 animate-spin" />
+                ) : !useRealApi ? (
+                  <Database className="w-5 h-5" />
+                ) : isRealConnected === true ? (
+                  <Wifi className="w-5 h-5" />
+                ) : (
+                  <WifiOff className="w-5 h-5" />
+                )}
+              </div>
+              
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">РЕЖИМ РАБОТЫ ПАНЕЛИ:</span>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                    !useRealApi 
+                      ? "bg-amber-500/15 border-amber-400/20 text-amber-300" 
+                      : isRealConnected === true 
+                      ? "bg-emerald-500/15 border-emerald-400/20 text-emerald-300"
+                      : "bg-rose-500/15 border-rose-400/20 text-rose-300"
+                  } font-mono`}>
+                    {!useRealApi ? "ЛОКАЛЬНАЯ ДЕМО БАЗА" : isRealConnected ? "ЖИВАЯ SQLite VPS" : "СБОЙ СВЯЗИ VPS"}
+                  </span>
+                </div>
+                
+                <h3 className="text-white text-sm font-semibold flex items-center gap-1.5 flex-wrap">
+                  {!useRealApi ? (
+                    <span>Используется локальное демо-хранилище (Mock режим)</span>
+                  ) : isRealConnected === true ? (
+                    <span className="flex items-center gap-1.5">
+                      Связь установлена к <code className="text-emerald-400 font-bold bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10 font-mono text-xs">{getApiBaseUrl()}</code>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-rose-300">
+                      Нет связи с VPS сервером по адресу <code className="text-rose-400 font-bold bg-rose-500/5 px-1.5 py-0.5 rounded border border-rose-500/10 font-mono text-xs">{getApiBaseUrl()}</code>
+                    </span>
+                  )}
+                </h3>
+              </div>
+            </div>
+
+            {/* Right side: Action triggers */}
+            <div className="flex flex-wrap items-center gap-2.5 sm:self-center shrink-0">
+              {/* Toggle real status vs fake status */}
+              <button
+                type="button"
+                onClick={() => setUseRealApi(!useRealApi)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 ${
+                  useRealApi 
+                    ? "bg-white/5 border-white/10 hover:bg-white/10 text-white/90" 
+                    : "bg-indigo-500 text-white border-indigo-400/30 hover:bg-indigo-600 shadow-md"
+                }`}
+              >
+                {useRealApi ? "Перейти на Демо-режим" : "Включить Живую VPS"}
+              </button>
+
+              {/* Refresh icon */}
+              {useRealApi && (
+                <button
+                  onClick={loadBotData}
+                  disabled={isLoading}
+                  title="Обновить связь с сервером"
+                  className="p-2 border border-white/10 hover:bg-white/10 bg-white/5 text-white/80 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                </button>
+              )}
+
+              {/* Configure URL settings */}
+              <button
+                onClick={() => setShowConfigPanel(!showConfigPanel)}
+                className={`p-2 border rounded-xl transition-all cursor-pointer duration-150 flex items-center justify-center gap-1.5 text-xs font-bold ${
+                  showConfigPanel 
+                    ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" 
+                    : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
+                }`}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                <span>Настройки домена</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Diagnostic Details block for Server Connection */}
+          <AnimatePresence>
+            {useRealApi && isRealConnected === false && apiError && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4 border-t border-rose-500/20 pt-4"
+              >
+                <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3.5 text-xs text-rose-200 flex gap-3 overflow-hidden">
+                  <AlertCircle className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+                  <div className="space-y-1.5 leading-relaxed">
+                    <p className="font-bold text-rose-300">⚠️ Почему отображается пустая база или демо-режим:</p>
+                    <p className="font-normal text-[11px] text-rose-100/80">
+                      Ваш браузер заблокировал или не смог выполнить запросы к домену <code className="bg-black/30 px-1 py-0.5 rounded font-mono font-bold text-rose-300">{getApiBaseUrl()}</code>.
+                      <br /><b>Причина ошибки:</b> <span className="font-semibold italic text-white">{apiError}</span>
+                    </p>
+                    <div className="pt-1.5 text-[11px] text-white/60 space-y-1 list-decimal pl-3 font-normal">
+                      <div>1. Убедитесь, что ваш Python FastAPI-сервер запускается с файлом <b className="text-white">admin_api.py</b> и корректно активен на VPS.</div>
+                      <div>2. В коде вашего FastAPI (<b className="text-sky-300 font-mono">admin_api.py</b>) обязательно должна быть включена поддержка CORS роутинга (CORSMiddleware) для вашего Netlify домена.</div>
+                      <div>3. Домен сервера должен поддерживать <b className="text-emerald-405 font-semibold">HTTPS</b>. Если ваш сервер VPS доступен по обычному HTTP (например, <code className="font-mono text-[10px] bg-black/30 px-1">http://api.antonovdv.ru</code>), браузер может заблокировать запрос из соображений безопасности (Mixed Content), так как Netlify работает по HTTPS.</div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Collapsible Connection URL Config form panel */}
+          <AnimatePresence>
+            {showConfigPanel && (
+              <motion.form 
+                onSubmit={handleSaveApiBaseUrl}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mt-4 border-t border-white/10 pt-4 space-y-3"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
+                  
+                  <div className="sm:col-span-3 space-y-1.5">
+                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
+                      Адрес вашего Python FastAPI сервера (VPS):
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        required
+                        placeholder="https://api.antonovdv.ru"
+                        value={apiUrl}
+                        onChange={(e) => setApiUrl(e.target.value)}
+                        className="w-full text-xs font-mono bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/40 text-white placeholder-white/20"
+                      />
+                    </div>
+                    <span className="text-[10px] text-white/40 block">
+                      Укажите домен (или IP-адрес с портом, например: <code className="font-mono bg-white/5 px-1 rounded text-orange-300">https://your-vps:8000</code>).
+                    </span>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                    >
+                      {isLoading ? "Подключение..." : "Применить"}
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={handleResetToDefaultUrl}
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-bold px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer"
+                      title="Сбросить на значение по умолчанию"
+                    >
+                      Сброс
+                    </button>
+                  </div>
+
+                </div>
+              </motion.form>
+            )}
+          </AnimatePresence>
+
         </motion.div>
 
         {/* Stats Cards Section */}
@@ -382,6 +711,8 @@ export default function App() {
         <MailingModal 
           users={users}
           onClose={() => setShowMailingModal(false)}
+          useRealApi={useRealApi}
+          isRealConnected={isRealConnected === true}
         />
       )}
 
