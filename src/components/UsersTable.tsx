@@ -19,23 +19,28 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
   const [tagFilter, setTagFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Extract all unique tags for the dropdown filter, excluding received_lead
+  // Наше строгое сито для нужных полосок
+  const ALLOWED_TAGS = [
+    "chain_money_meditation",
+    "chain_energy",
+    "chain_little_step",
+    "chain_ideal_day"
+  ];
+
+  // Собираем список тегов для выпадающего меню фильтра
   const allTags = Array.from(
     new Set(users.flatMap(u => u.tags))
-  ).filter(tag => tag !== "received_lead");
+  ).filter(tag => ALLOWED_TAGS.includes(tag));
 
-  // Filter logic
+  // Логика фильтрации таблицы
   const filteredUsers = users.filter(user => {
-    // 1. Search term
     const matchesSearch = 
       user.user_id.toString().includes(searchTerm) ||
       (user.first_name && user.first_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    // 2. Tag filter
     const matchesTag = tagFilter === "" || user.tags.includes(tagFilter);
 
-    // 3. Status filter
     const matchesStatus = 
       statusFilter === "all" ||
       (statusFilter === "active" && user.is_active) ||
@@ -44,22 +49,22 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
     return matchesSearch && matchesTag && matchesStatus;
   });
 
+  // Палитра красок
   const getTagColorClass = (tag: string) => {
-    switch (tag) {
-      case "money_and_succes": return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
-      case "ideal_day": return "bg-purple-500/10 text-purple-300 border-purple-500/20";
-      case "little_step": return "bg-amber-500/10 text-amber-300 border-amber-500/20";
-      case "energy": return "bg-pink-500/10 text-pink-400 border-pink-500/20";
-      default: return "bg-white/5 text-white/70 border-white/10";
-    }
+    if (tag.includes("money")) return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
+    if (tag.includes("ideal")) return "bg-purple-500/10 text-purple-300 border-purple-500/20";
+    if (tag.includes("step")) return "bg-amber-500/10 text-amber-300 border-amber-500/20";
+    if (tag.includes("energy")) return "bg-pink-500/10 text-pink-400 border-pink-500/20";
+    return "bg-white/5 text-white/70 border-white/10";
   };
 
+  // Электронный словарик
   const getTagLabel = (tag: string) => {
     switch (tag) {
-      case "money_and_succes": return "Медитация «Успех»";
-      case "ideal_day": return "Медитация «Идеальный день»";
-      case "little_step": return "Гайд «Шаги»";
-      case "energy": return "Гайд «Энергия»";
+      case "chain_money_meditation": return "Медитация Деньги и успех";
+      case "chain_ideal_day": return "Медитация Идеальный день";
+      case "chain_little_step": return "Гайд Магия маленьких шагов";
+      case "chain_energy": return "Гайд Почему нет энергии";
       default: return tag;
     }
   };
@@ -67,7 +72,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
   return (
     <div className="bg-white/[0.03] rounded-3xl ring-1 ring-white/10 backdrop-blur overflow-hidden" id="users-table-section">
       
-      {/* Table Toolbar */}
+      {/* Верхняя панель таблицы */}
       <div className="p-5 border-b border-white/10 bg-white/[0.01] space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 font-display">
@@ -81,7 +86,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           
-          {/* Search bar */}
           <div className="relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             <input 
@@ -93,7 +97,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
             />
           </div>
 
-          {/* Tag Filter */}
           <div className="relative flex items-center">
             <Filter className="absolute left-3.5 w-3.5 h-3.5 text-white/30" />
             <select
@@ -108,7 +111,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
             </select>
           </div>
 
-          {/* Status Filter */}
           <div className="relative flex items-center">
             <Filter className="absolute left-3.5 w-3.5 h-3.5 text-white/30" />
             <select
@@ -125,7 +127,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
         </div>
       </div>
 
-      {/* Users Table */}
       <div className="overflow-x-auto custom-scrollbar">
         <table className="w-full text-left text-xs text-white/85">
           <thead className="bg-white/5 text-white/50 uppercase tracking-widest text-[9px] font-bold border-b border-white/10 font-mono">
@@ -150,17 +151,14 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
               filteredUsers.map(user => (
                 <tr key={user.id} className="hover:bg-white/[0.02] transition-colors duration-150">
                   
-                  {/* ID */}
                   <td className="px-5 py-4 font-bold text-white/40 font-mono text-[11px]">
                     {user.user_id}
                   </td>
 
-                  {/* Name */}
                   <td className="px-5 py-4 font-semibold text-white">
                     {user.first_name || <span className="text-white/30 italic font-mono">—</span>}
                   </td>
 
-                  {/* Username */}
                   <td className="px-5 py-4">
                     {user.username ? (
                       <a 
@@ -176,7 +174,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                     )}
                   </td>
 
-                  {/* Status */}
                   <td className="px-5 py-4">
                     {user.is_active ? (
                       <span className="bg-emerald-500/10 text-emerald-300 font-semibold px-2.5 py-1 rounded-xl border border-emerald-500/20 inline-flex items-center gap-1.5 text-[10px]">
@@ -191,14 +188,13 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                     )}
                   </td>
 
-                  {/* Tags */}
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap gap-1 max-w-[280px]">
-                      {user.tags.filter(t => t !== "received_lead").length === 0 ? (
+                      {user.tags.filter(t => ALLOWED_TAGS.includes(t)).length === 0 ? (
                         <span className="text-white/30 italic text-[10px]">нет воронки</span>
                       ) : (
                         user.tags
-                          .filter(t => t !== "received_lead")
+                          .filter(t => ALLOWED_TAGS.includes(t))
                           .map(tag => (
                             <span 
                               key={tag} 
@@ -211,16 +207,13 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                     </div>
                   </td>
 
-                  {/* Created At Date */}
                   <td className="px-5 py-4 text-white/50 font-medium whitespace-nowrap font-mono">
                     {user.created_at.split(" ")[0]}
                   </td>
 
-                  {/* Actions column */}
                   <td className="px-5 py-4 text-right w-36 whitespace-nowrap">
                     <div className="flex items-center justify-end gap-1.5">
                       
-                      {/* View details */}
                       <button 
                         onClick={() => onSelectUser(user)}
                         className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-all cursor-pointer"
@@ -229,7 +222,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                         <Eye className="w-4 h-4" />
                       </button>
 
-                      {/* Toggle block/active status */}
                       <button 
                         onClick={() => onToggleStatus(user.id)}
                         className={`p-1.5 rounded-lg transition-all cursor-pointer ${
@@ -246,7 +238,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                         )}
                       </button>
 
-                      {/* Delete user */}
                       <button 
                         onClick={() => {
                           if (confirm("Вы точно хотите навсегда удалить пользователя из локальной базы?")) {
@@ -269,7 +260,6 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
         </table>
       </div>
 
-      {/* Pagination Footer */}
       <div className="p-4 bg-white/[0.01] border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-white/50 font-medium font-sans">
         <span>Показано 1-{filteredUsers.length} из {filteredUsers.length}</span>
         <div className="flex items-center gap-1.5">
