@@ -326,7 +326,7 @@ export default function App() {
             Аналитика & Контроль Воронок
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-xs sm:text-sm text-white/60 font-normal">
-            Интегрированная база данных потенциальных клиентов, пришедших по вебхукам с мини-лендингов Tilda в ваш Python-бот
+            Интегрированная база данных потенциальных клиентов, пришедших с мини-лендингов в Телеграм-бот
           </p>
         </motion.div>
 
@@ -591,7 +591,7 @@ export default function App() {
             <div className="relative z-10">
               <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 mb-1.5 font-display">
                 <Award className="w-5 h-5 text-sky-300" />
-                Распределение лидов по вороночным тегам
+                Распределение лидов по тегам воронок
               </h3>
               <p className="text-xs text-white/50 mb-6 font-normal">
                 Доли подписчиков, верифицировавших и активировавших конкретные подарки Money Migel
@@ -636,7 +636,7 @@ export default function App() {
             </div>
 
             <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4.5 text-xs text-white/50 mt-4 leading-relaxed relative z-10 w-full shrink-0">
-              💡 <b>Как это работает:</b> При заполнении форм на Tilda, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает кнопку запуска в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
+              💡 <b>Как это работает:</b> При заполнении форм на лендингах, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает кнопку запуска в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
             </div>
           </motion.div>
 
@@ -661,7 +661,7 @@ export default function App() {
           <span>Панель администрирования бота Money Migel © 2026.</span>
           <span className="flex items-center gap-1 font-mono text-[10px] text-white/30">
             <Sparkles className="w-3 h-3 text-indigo-400" />
-            Ultraviolet Premium Design
+            Antonov Dmitriy Design
           </span>
         </div>
       </footer>
