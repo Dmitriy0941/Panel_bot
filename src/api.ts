@@ -203,6 +203,13 @@ export async function updateUserReal(user_id: number, tags: string[], is_active?
   });
 }
 
+// 6. Delete all inactive/blocked users from SQLite
+export async function cleanupBlockedUsersReal(): Promise<{ success: boolean; message: string; deleted_count: number }> {
+  return await apiRequest("/api/users/cleanup-blocked", {
+    method: "POST",
+  });
+}
+
 // 5. Bulk Import users via CSV to FastAPI
 export async function importUsersReal(users: BotUser[]): Promise<any> {
   return { success: true, message: "Используйте интерфейс загрузки CSV для импорта." };

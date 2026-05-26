@@ -19,7 +19,8 @@ import {
   Database,
   Settings,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -33,7 +34,8 @@ import {
   toggleUserActiveReal, 
   deleteUserReal, 
   importUsersReal,
-  updateUserReal
+  updateUserReal,
+  cleanupBlockedUsersReal
 } from "./api";
 
 import LoginScreen from "./components/LoginScreen";
@@ -200,6 +202,39 @@ export default function App() {
       }
     } else {
       saveUsersToStorage(filtered);
+    }
+  };
+
+  const handleCleanupBlocked = async () => {
+    const blockedUsers = users.filter(u => !u.is_active);
+    const blockedCount = blockedUsers.length;
+    if (blockedCount === 0) {
+      alert("В базе данных нет неактивных пользователей (которые заблокировали или удалили бота) для удаления.");
+      return;
+    }
+
+    if (!confirm(`Вы действительно хотите навсегда удалить всех неактивных пользователей (${blockedCount} чел.) из базы бота SQLite?`)) {
+      return;
+    }
+
+    setIsLoading(true);
+    if (useRealApi && isRealConnected) {
+      try {
+        const res = await cleanupBlockedUsersReal();
+        alert(res.message || `Успешно удалено неактивных пользователей: ${blockedCount}`);
+        await loadBotData();
+      } catch (err: any) {
+        alert("Ошибка очистки на сервере: " + err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // Локальный/демо режим
+      const activeUsers = users.filter(u => u.is_active);
+      setUsers(activeUsers);
+      saveUsersToStorage(activeUsers);
+      setIsLoading(false);
+      alert(`Успешно удалено ${blockedCount} неактивных пользователей из локальной базы.`);
     }
   };
 
@@ -428,6 +463,17 @@ export default function App() {
               >
                 <Settings className="w-3.5 h-3.5" />
                 <span>Настройки домена</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCleanupBlocked}
+                disabled={isLoading}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-500/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                title="Удалить всех неактивных пользователей из базы"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Очистить неактивных</span>
               </button>
             </div>
           </div>
