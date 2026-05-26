@@ -133,29 +133,51 @@ export default function App() {
   };
 
   const handleImportSuccess = async (importedUsers: BotUser[]) => {
-    const existingUids = users.map(u => u.user_id);
-    const uniqueImported = importedUsers.filter(u => !existingUids.includes(u.user_id));
-    
-    if (uniqueImported.length === 0) {
-      alert("Все импортируемые пользователи уже есть в базе данных!");
+    if (importedUsers.length === 0) {
+      alert("Файл импорта пуст!");
       return;
     }
 
-    const merged = [...uniqueImported, ...users];
-    
     if (useRealApi && isRealConnected) {
       try {
         setIsLoading(true);
-        await importUsersReal(uniqueImported);
+        // Отправляем все контакты на сервер, чтобы бэкенд мог вставить новые и ОБНОВИТЬ старые (никнеймы, имена, теги)
+        const res = await importUsersReal(importedUsers);
+        alert(res.message || "Импорт успешно завершен!");
         await loadBotData(); 
       } catch (err: any) {
         alert("Ошибка импорта на живой сервер: " + err.message);
-        handleUpdateUsersList(merged);
       } finally {
         setIsLoading(false);
       }
     } else {
-      handleUpdateUsersList(merged);
+      // Локальный / демо режим
+      const updatedUsersList = [...users];
+      let addedCount = 0;
+      let updatedCount = 0;
+
+      for (const imp of importedUsers) {
+        const existingIdx = updatedUsersList.findIndex(u => u.user_id === imp.user_id);
+        if (existingIdx !== -1) {
+          // Обновляем существующего
+          const existing = updatedUsersList[existingIdx];
+          const mergedTags = Array.from(new Set([...existing.tags, ...imp.tags]));
+          updatedUsersList[existingIdx] = {
+            ...existing,
+            username: imp.username || existing.username,
+            first_name: imp.first_name || existing.first_name,
+            tags: mergedTags
+          };
+          updatedCount++;
+        } else {
+          // Добавляем нового
+          updatedUsersList.unshift(imp);
+          addedCount++;
+        }
+      }
+
+      handleUpdateUsersList(updatedUsersList);
+      alert(`Локальный импорт завершен! Добавлено новых: ${addedCount}, обновлено существующих: ${updatedCount}`);
     }
   };
 
