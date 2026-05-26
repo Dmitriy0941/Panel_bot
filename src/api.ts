@@ -212,5 +212,46 @@ export async function cleanupBlockedUsersReal(): Promise<{ success: boolean; mes
 
 // 5. Bulk Import users via CSV to FastAPI
 export async function importUsersReal(users: BotUser[]): Promise<any> {
-  return { success: true, message: "Используйте интерфейс загрузки CSV для импорта." };
+  const headers = ["user_id", "username", "first_name", "tags"];
+  const csvRows = [headers.join(",")];
+
+  users.forEach(u => {
+    const row = [
+      u.user_id,
+      u.username ? `${u.username}` : "",
+      u.first_name ? `"${u.first_name.replace(/"/g, '""')}"` : "",
+      `"${u.tags.join(",")}"`
+    ];
+    csvRows.push(row.join(","));
+  });
+
+  const csvString = csvRows.join("\n");
+  const blob = new Blob([csvString], { type: "text/csv" });
+  const formData = new FormData();
+  formData.append("file", blob, "import.csv");
+
+  const baseUrl = getApiBaseUrl().replace(/\/$/, "");
+  const url = `${baseUrl}/api/users/import`;
+  const token = localStorage.getItem("bot_admin_token");
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let errMsg = `Ошибка импорта (Код: ${res.status})`;
+    try {
+      const errJson = await res.json();
+      if (errJson && errJson.detail) {
+        errMsg = typeof errJson.detail === "string" ? errJson.detail : JSON.stringify(errJson.detail);
+      }
+    } catch (e) {}
+    throw new Error(errMsg);
+  }
+
+  return await res.json();
 }
