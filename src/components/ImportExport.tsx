@@ -131,8 +131,9 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       if (userId <= 0) continue;
 
       let rUsername = currentline[usernameIdx]?.replace(/"/g, "").replace("@", "").trim() || "";
-      if (rUsername.includes("@") || rUsername.includes(".")) {
-        rUsername = ""; // Clear if it contains email or domain patterns, forcing get_chat API lookup
+      // Telegram username must start with a letter, contain only a-z, 0-9, underscores, and be at least 5 chars long
+      if (!/^[a-zA-Z][a-zA-Z0-9_]{4,}$/.test(rUsername)) {
+        rUsername = ""; // Clear invalid username format to force Telegram API lookup
       }
       let rFirstName = currentline[nameIdx]?.replace(/"/g, "").trim() || "";
       let rTagsStr = currentline[tagsIdx]?.replace(/"/g, "").trim() || "";
