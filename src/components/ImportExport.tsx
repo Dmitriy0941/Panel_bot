@@ -79,17 +79,31 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       for (let col = 0; col < headers.length; col++) {
         if (col === idIdx || col === nameIdx || col === tagsIdx) continue;
         
+        const headerName = headers[col] || "";
+        // Skip columns that explicitly mention bot, status, or date in their headers
+        if (headerName.includes("bot") || 
+            headerName.includes("бот") || 
+            headerName.includes("status") || 
+            headerName.includes("статус") || 
+            headerName.includes("date") || 
+            headerName.includes("дата") || 
+            headerName.includes("created")) {
+          continue;
+        }
+
         // Scan the first data row value
         const firstRowCells = lines[1]?.split(regex) || [];
         const cellValue = firstRowCells[col]?.replace(/"/g, "").trim().toLowerCase() || "";
         
-        // A valid username is not a platform name (Telegram/vk), not a boolean, not a link, and not a number
+        // A valid username is not a platform name (Telegram/vk), not a bot name, not a boolean, not a link, and not a number
         if (cellValue && 
             cellValue !== "telegram" && 
             cellValue !== "vk" && 
             cellValue !== "viber" &&
             cellValue !== "true" &&
             cellValue !== "false" &&
+            !cellValue.includes("bot") && 
+            !cellValue.includes("бот") && 
             isNaN(Number(cellValue)) && 
             !cellValue.includes("http") && 
             !cellValue.includes("-") && 
