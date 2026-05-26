@@ -101,8 +101,9 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
         const firstRowCells = lines[1]?.split(regex) || [];
         const cellValue = firstRowCells[col]?.replace(/"/g, "").trim().toLowerCase() || "";
         
-        // A valid username is not a platform name (Telegram/vk), not a bot name, not a boolean, not a link, and not a number
+        // A valid username is not a platform name (Telegram/vk), not a bot name, not a boolean, not a link, not a number, and NOT an email (doesn't contain '@')
         if (cellValue && 
+            !cellValue.includes("@") &&
             cellValue !== "telegram" && 
             cellValue !== "vk" && 
             cellValue !== "viber" &&
@@ -177,6 +178,9 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       if (userId <= 0) continue;
 
       let rUsername = currentline[usernameIdx]?.replace(/"/g, "").replace("@", "").trim() || "";
+      if (rUsername.includes("@") || rUsername.includes(".")) {
+        rUsername = ""; // Clear if it contains email or domain patterns, forcing get_chat API lookup
+      }
       let rFirstName = currentline[nameIdx]?.replace(/"/g, "").trim() || "";
       let rTagsStr = currentline[tagsIdx]?.replace(/"/g, "").trim() || "";
       let rPhone = phoneIdx !== -1 ? currentline[phoneIdx]?.replace(/"/g, "").trim() || "" : "";
