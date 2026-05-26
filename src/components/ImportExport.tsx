@@ -20,34 +20,80 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
   }>({ type: null, message: "" });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Parse CSV string into BotUser array
+  // Parse CSV string into BotUser array with support for Salebot formats, Excel delimiters, and exponential number formats
   const parseCSV = (text: string): BotUser[] => {
     const lines = text.split("\n").map(line => line.trim()).filter(line => line.length > 0);
     if (lines.length <= 1) return [];
 
-    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+    // Automatically detect delimiter (Excel in Russian locale uses semicolon ';', standard is comma ',')
+    const firstLine = lines[0];
+    const commaCount = (firstLine.match(/,/g) || []).length;
+    const semicolonCount = (firstLine.match(/;/g) || []).length;
+    const delimiter = semicolonCount > commaCount ? ";" : ",";
+
+    // Clean headers from quotes and spaces
+    const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/"/g, ""));
     const importedUsers: BotUser[] = [];
 
-    // Find indices
-    const idIdx = headers.indexOf("user_id");
-    const usernameIdx = headers.indexOf("username");
-    const nameIdx = headers.indexOf("first_name");
-    const tagsIdx = headers.indexOf("tags");
+    // Intelligent column index mapping for English/Russian Salebot and custom headers
+    let idIdx = -1;
+    let usernameIdx = -1;
+    let nameIdx = -1;
+    let tagsIdx = -1;
+
+    const idHeaders = [
+      "platform_id", "идентификатор на платформе", "идентификатор пользователя", 
+      "идентификатор платформы", "platform id", "id на платформе", "platformid", 
+      "client_id", "client id", "id", "идентификатор"
+    ];
+    const usernameHeaders = ["username", "nik", "ник", "nickname", "логин", "username на платформе", "никнейм"];
+    const nameHeaders = ["first_name", "name", "имя", "fio", "фио", "first name", "имя пользователя"];
+    const tagsHeaders = ["tags", "теги", "сегменты", "группы", "tag", "тег"];
+
+    for (let i = 0; i < headers.length; i++) {
+      const h = headers[i];
+      if (idIdx === -1 && idHeaders.includes(h)) idIdx = i;
+      if (usernameIdx === -1 && usernameHeaders.includes(h)) usernameIdx = i;
+      if (nameIdx === -1 && nameHeaders.includes(h)) nameIdx = i;
+      if (tagsIdx === -1 && tagsHeaders.includes(h)) tagsIdx = i;
+    }
+
+    // Additional fuzzy matching for ID
+    if (idIdx === -1) {
+      idIdx = headers.findIndex(h => h.includes("platform") || h.includes("идентификатор") || h.includes("user_id") || h.includes("userid"));
+    }
+    
+    // Default indices if mapping failed
+    if (idIdx === -1) idIdx = 0;
+    if (nameIdx === -1) nameIdx = 1;
+    if (usernameIdx === -1) usernameIdx = 2;
+    if (tagsIdx === -1) tagsIdx = headers.length > 3 ? 3 : headers.length - 1;
+
+    // Split rows considering quotes and dynamically detected delimiter
+    const regex = new RegExp(`${delimiter}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
 
     for (let i = 1; i < lines.length; i++) {
-      const currentline = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+      const currentline = lines[i].split(regex);
+      if (currentline.length <= Math.max(idIdx, nameIdx, usernameIdx, tagsIdx)) continue;
       
-      const userIdStr = currentline[idIdx]?.replace(/"/g, "") || "";
-      const userId = parseInt(userIdStr, 10);
-      if (isNaN(userId)) continue;
+      let userIdStr = currentline[idIdx]?.replace(/"/g, "").trim() || "";
+      if (!userIdStr) continue;
 
-      let rUsername = currentline[usernameIdx]?.replace(/"/g, "").replace("@", "") || "";
-      let rFirstName = currentline[nameIdx]?.replace(/"/g, "") || "";
-      let rTagsStr = currentline[tagsIdx]?.replace(/"/g, "") || "";
+      // Handle Excel exponential/scientific number formats (e.g. 6,24E+09 or 6.24E+09)
+      userIdStr = userIdStr.replace(",", "."); // convert decimal separator
+      const parsedNum = Number(userIdStr);
+      if (isNaN(parsedNum)) continue;
 
-      // Parse tags
+      const userId = Math.round(parsedNum);
+      if (userId <= 0) continue;
+
+      let rUsername = currentline[usernameIdx]?.replace(/"/g, "").replace("@", "").trim() || "";
+      let rFirstName = currentline[nameIdx]?.replace(/"/g, "").trim() || "";
+      let rTagsStr = currentline[tagsIdx]?.replace(/"/g, "").trim() || "";
+
+      // Parse tags separated by comma, semicolon, or vertical bar
       const tags = rTagsStr
-        ? rTagsStr.split(/[;|]/).map(t => t.trim()).filter(Boolean)
+        ? rTagsStr.split(/[;,|]/).map(t => t.trim()).filter(Boolean)
         : [];
 
       importedUsers.push({
