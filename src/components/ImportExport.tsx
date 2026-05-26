@@ -72,54 +72,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     // Split rows considering quotes and dynamically detected delimiter
     const regex = new RegExp(`${delimiter}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
 
-    // Additional fuzzy matching for username, excluding ID columns
-    if (usernameIdx === -1) {
-      usernameIdx = headers.findIndex(h => {
-        const lh = h.toLowerCase();
-        return (lh.includes("username") || lh.includes("nik") || lh.includes("ник") || lh.includes("логин")) && !lh.includes("id");
-      });
-    }
 
-    // Heuristics to find real Telegram Username column if headers are fuzzy or default index '2' points to a platform name (like 'Telegram')
-    if (usernameIdx === -1) {
-      for (let col = 0; col < headers.length; col++) {
-        if (col === idIdx || col === nameIdx || col === tagsIdx) continue;
-        
-        const headerName = headers[col] || "";
-        // Skip columns that explicitly mention bot, status, or date in their headers
-        if (headerName.includes("bot") || 
-            headerName.includes("бот") || 
-            headerName.includes("status") || 
-            headerName.includes("статус") || 
-            headerName.includes("date") || 
-            headerName.includes("дата") || 
-            headerName.includes("created")) {
-          continue;
-        }
-
-        // Scan the first data row value
-        const firstRowCells = lines[1]?.split(regex) || [];
-        const cellValue = firstRowCells[col]?.replace(/"/g, "").trim().toLowerCase() || "";
-        
-        // A valid username is not a platform name (Telegram/vk), not a bot name, not a boolean, not a link, not a number, and NOT an email (doesn't contain '@')
-        if (cellValue && 
-            !cellValue.includes("@") &&
-            cellValue !== "telegram" && 
-            cellValue !== "vk" && 
-            cellValue !== "viber" &&
-            cellValue !== "true" &&
-            cellValue !== "false" &&
-            !cellValue.includes("bot") && 
-            !cellValue.includes("бот") && 
-            isNaN(Number(cellValue)) && 
-            !cellValue.includes("http") && 
-            !cellValue.includes("-") && 
-            cellValue.length < 32) {
-          usernameIdx = col;
-          break;
-        }
-      }
-    }
     
     // Dynamic value-scanning heuristics for Email and Phone columns if not matched by headers
     if (emailIdx === -1) {
@@ -159,7 +112,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     // Default indices if mapping failed completely
     if (idIdx === -1) idIdx = 0;
     if (nameIdx === -1) nameIdx = 1;
-    if (usernameIdx === -1) usernameIdx = 2; // fallback if no username found
+    // We strictly do NOT fallback for usernameIdx to prevent false positive imports (like UTM sources or emails)
     if (tagsIdx === -1) tagsIdx = headers.length > 3 ? 3 : headers.length - 1;
 
     for (let i = 1; i < lines.length; i++) {
