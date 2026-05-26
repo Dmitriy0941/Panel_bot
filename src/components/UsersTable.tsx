@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Eye, ToggleLeft, ToggleRight, Trash2, Filter, Sparkles } from "lucide-react";
 import { BotUser } from "../types";
 
@@ -18,6 +18,14 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
   const [searchTerm, setSearchTerm] = useState("");
   const [tagFilter, setTagFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 20;
+
+  // Reset page to 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, tagFilter, statusFilter]);
 
   // Собираем список тегов для выпадающего меню фильтра, исключая служебные
   const allTags = Array.from(
@@ -40,6 +48,13 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
 
     return matchesSearch && matchesTag && matchesStatus;
   });
+
+  // Расчет пагинации
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE) || 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, filteredUsers.length);
+  const shownFrom = filteredUsers.length > 0 ? startIndex + 1 : 0;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   // Палитра красок
   const getTagColorClass = (tag: string) => {
@@ -148,7 +163,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                 </td>
               </tr>
             ) : (
-              filteredUsers.map(user => (
+              paginatedUsers.map(user => (
                 <tr key={user.id} className="hover:bg-white/[0.02] transition-colors duration-150">
                   
                   <td className="px-5 py-4 font-bold text-white/40 font-mono text-[11px]">
@@ -261,12 +276,89 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
       </div>
 
       <div className="p-4 bg-white/[0.01] border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-white/50 font-medium font-sans">
-        <span>Показано 1-{filteredUsers.length} из {filteredUsers.length}</span>
-        <div className="flex items-center gap-1.5">
-          <button className="px-3 py-1 bg-white/5 border border-white/10 rounded-xl text-white/20 select-none cursor-not-allowed">Назад</button>
-          <button className="px-3 py-1 bg-sky-500 border border-sky-400/20 rounded-xl text-white font-bold">1</button>
-          <button className="px-3 py-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white/85 rounded-xl transition-all cursor-pointer">Вперед</button>
-        </div>
+        <span>Показано {shownFrom}-{endIndex} из {filteredUsers.length}</span>
+        
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all ${
+                currentPage === 1
+                  ? "bg-white/5 border-white/5 text-white/20 cursor-not-allowed"
+                  : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10 active:scale-95 cursor-pointer"
+              }`}
+            >
+              Назад
+            </button>
+
+            {(() => {
+              const startPage = Math.max(1, currentPage - 2);
+              const endPage = Math.min(totalPages, currentPage + 2);
+              const buttons = [];
+              
+              if (startPage > 1) {
+                buttons.push(
+                  <button
+                    key={1}
+                    onClick={() => setCurrentPage(1)}
+                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold"
+                  >
+                    1
+                  </button>
+                );
+                if (startPage > 2) {
+                  buttons.push(<span key="dots-start" className="text-white/35 px-1 font-bold">...</span>);
+                }
+              }
+
+              for (let i = startPage; i <= endPage; i++) {
+                buttons.push(
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(i)}
+                    className={`px-3 py-1 rounded-xl border font-bold transition-all cursor-pointer active:scale-95 ${
+                      currentPage === i
+                        ? "bg-sky-500 border-sky-400/20 text-white shadow-md shadow-sky-500/20"
+                        : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                    }`}
+                  >
+                    {i}
+                  </button>
+                );
+              }
+
+              if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                  buttons.push(<span key="dots-end" className="text-white/35 px-1 font-bold">...</span>);
+                }
+                buttons.push(
+                  <button
+                    key={totalPages}
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold"
+                  >
+                    {totalPages}
+                  </button>
+                );
+              }
+
+              return buttons;
+            })()}
+
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1.5 rounded-xl text-[11px] font-bold border transition-all ${
+                currentPage === totalPages
+                  ? "bg-white/5 border-white/5 text-white/20 cursor-not-allowed"
+                  : "bg-white/5 border-white/10 text-white/80 hover:bg-white/10 active:scale-95 cursor-pointer"
+              }`}
+            >
+              Вперед
+            </button>
+          </div>
+        )}
       </div>
 
     </div>
