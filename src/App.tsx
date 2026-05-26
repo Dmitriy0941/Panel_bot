@@ -674,6 +674,8 @@ export default function App() {
           user={selectedUser}
           onClose={() => setSelectedUser(null)}
           onUpdateUser={handleUpdateUserInModal}
+          useRealApi={useRealApi}
+          isRealConnected={isRealConnected === true}
         />
       )}
 

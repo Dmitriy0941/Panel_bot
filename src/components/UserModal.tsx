@@ -6,14 +6,17 @@
 import React, { useState } from "react";
 import { X, User, Plus, Trash2, Send, CheckCircle2, Bot, Calendar, Landmark } from "lucide-react";
 import { BotUser } from "../types";
+import { sendMailingReal } from "../api";
 
 interface UserModalProps {
   user: BotUser;
   onClose: () => void;
   onUpdateUser: (updated: BotUser) => void;
+  useRealApi?: boolean;
+  isRealConnected?: boolean;
 }
 
-export default function UserModal({ user, onClose, onUpdateUser }: UserModalProps) {
+export default function UserModal({ user, onClose, onUpdateUser, useRealApi = false, isRealConnected = false }: UserModalProps) {
   const [newTag, setNewTag] = useState("");
   const [msgText, setMsgText] = useState("");
   const [sentStatus, setSentStatus] = useState(false);
@@ -46,17 +49,34 @@ export default function UserModal({ user, onClose, onUpdateUser }: UserModalProp
     });
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!msgText.trim()) return;
     
     setSending(true);
-    setTimeout(() => {
-      setSending(false);
-      setSentStatus(true);
-      setTimeout(() => setSentStatus(false), 3000);
-      setMsgText("");
-    }, 800);
+    if (useRealApi && isRealConnected) {
+      try {
+        await sendMailingReal({
+          text: msgText,
+          target: "users",
+          user_ids: [user.user_id]
+        });
+        setSending(false);
+        setSentStatus(true);
+        setTimeout(() => setSentStatus(false), 4000);
+        setMsgText("");
+      } catch (err: any) {
+        setSending(false);
+        alert("Не удалось отправить тестовое сообщение: " + err.message);
+      }
+    } else {
+      setTimeout(() => {
+        setSending(false);
+        setSentStatus(true);
+        setTimeout(() => setSentStatus(false), 3000);
+        setMsgText("");
+      }, 800);
+    }
   };
 
   // Human-readable labels for specific funnel tags
