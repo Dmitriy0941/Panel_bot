@@ -62,15 +62,49 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     if (idIdx === -1) {
       idIdx = headers.findIndex(h => h.includes("platform") || h.includes("идентификатор") || h.includes("user_id") || h.includes("userid"));
     }
-    
-    // Default indices if mapping failed
-    if (idIdx === -1) idIdx = 0;
-    if (nameIdx === -1) nameIdx = 1;
-    if (usernameIdx === -1) usernameIdx = 2;
-    if (tagsIdx === -1) tagsIdx = headers.length > 3 ? 3 : headers.length - 1;
 
     // Split rows considering quotes and dynamically detected delimiter
     const regex = new RegExp(`${delimiter}(?=(?:(?:[^"]*"){2})*[^"]*$)`);
+
+    // Additional fuzzy matching for username, excluding ID columns
+    if (usernameIdx === -1) {
+      usernameIdx = headers.findIndex(h => {
+        const lh = h.toLowerCase();
+        return (lh.includes("username") || lh.includes("nik") || lh.includes("ник") || lh.includes("логин")) && !lh.includes("id");
+      });
+    }
+
+    // Heuristics to find real Telegram Username column if headers are fuzzy or default index '2' points to a platform name (like 'Telegram')
+    if (usernameIdx === -1) {
+      for (let col = 0; col < headers.length; col++) {
+        if (col === idIdx || col === nameIdx || col === tagsIdx) continue;
+        
+        // Scan the first data row value
+        const firstRowCells = lines[1]?.split(regex) || [];
+        const cellValue = firstRowCells[col]?.replace(/"/g, "").trim().toLowerCase() || "";
+        
+        // A valid username is not a platform name (Telegram/vk), not a boolean, not a link, and not a number
+        if (cellValue && 
+            cellValue !== "telegram" && 
+            cellValue !== "vk" && 
+            cellValue !== "viber" &&
+            cellValue !== "true" &&
+            cellValue !== "false" &&
+            isNaN(Number(cellValue)) && 
+            !cellValue.includes("http") && 
+            !cellValue.includes("-") && 
+            cellValue.length < 32) {
+          usernameIdx = col;
+          break;
+        }
+      }
+    }
+    
+    // Default indices if mapping failed completely
+    if (idIdx === -1) idIdx = 0;
+    if (nameIdx === -1) nameIdx = 1;
+    if (usernameIdx === -1) usernameIdx = 2; // fallback if no username found
+    if (tagsIdx === -1) tagsIdx = headers.length > 3 ? 3 : headers.length - 1;
 
     for (let i = 1; i < lines.length; i++) {
       const currentline = lines[i].split(regex);
@@ -107,7 +141,24 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       });
     }
 
-    return importedUsers;
+    // Collapse duplicates by user_id and merge their tags
+    const uniqueUsersMap = new Map<number, BotUser>();
+
+    for (const u of importedUsers) {
+      if (uniqueUsersMap.has(u.user_id)) {
+        const existing = uniqueUsersMap.get(u.user_id)!;
+        // Merge tags, ensuring uniqueness
+        const mergedTags = Array.from(new Set([...(existing.tags || []), ...(u.tags || [])]));
+        existing.tags = mergedTags;
+        // Merge names and usernames if missing
+        if (!existing.username && u.username) existing.username = u.username;
+        if (!existing.first_name && u.first_name) existing.first_name = u.first_name;
+      } else {
+        uniqueUsersMap.set(u.user_id, u);
+      }
+    }
+
+    return Array.from(uniqueUsersMap.values());
   };
 
   const handleFiles = (files: FileList) => {
