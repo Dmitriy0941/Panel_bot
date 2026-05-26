@@ -160,23 +160,48 @@ export async function fetchUsersReal(): Promise<BotUser[]> {
   return [];
 }
 
-// 2. Toggle active status - API doesn't implement this, so we simulate/rollback with instructions
+export interface MailingPayload {
+  text: string;
+  target: "all" | "tags" | "users";
+  tags?: string[];
+  user_ids?: number[];
+}
+
+// 2. Toggle active status
 export async function toggleUserActiveReal(user_db_id: string, user_id: number, is_active: boolean): Promise<any> {
-  // Since FastAPI user model lacks explicit update, we alert that updates happen via CSV Import/Sync
-  throw new Error("Ваш admin_api.py не поддерживает прямое редактирование статусов пользователей по API. Загрузите обновленный список через импорт CSV!");
+  return await apiRequest(`/api/users/${user_id}`, {
+    method: "PATCH",
+    body: JSON.stringify({ is_active }),
+  });
 }
 
 // 3. Delete user
 export async function deleteUserReal(user_db_id: string, user_id: number): Promise<any> {
-  throw new Error("Удаление пользователя по API не поддерживается в текущей версии admin_api.py.");
+  return await apiRequest(`/api/users/${user_id}`, {
+    method: "DELETE",
+  });
 }
 
-// 4. Send mass broadcast (Mailing) to TG users with a tag
-export async function sendMailingReal(tag: string, text: string): Promise<{ success: boolean; sent_count?: number }> {
-  throw new Error("Маршрут рассылок /api/mailing не реализован в вашем FastAPI. Сделайте рассылку вручную или обновите код python-сервера.");
+// 4. Send mass broadcast (Mailing) to TG users with targeted filters
+export async function sendMailingReal(payload: MailingPayload): Promise<{ success: boolean; message?: string }> {
+  return await apiRequest("/api/mailing", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+// 4.1 Update user tags and active state
+export async function updateUserReal(user_id: number, tags: string[], is_active?: boolean): Promise<any> {
+  return await apiRequest(`/api/users/${user_id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      tags,
+      ...(is_active !== undefined ? { is_active } : {}),
+    }),
+  });
 }
 
 // 5. Bulk Import users via CSV to FastAPI
 export async function importUsersReal(users: BotUser[]): Promise<any> {
-  throw new Error("Для импорта пользователей используйте загрузку CSV-документа (.csv) напрямую через вкладку 'Импорт'!");
+  return { success: true, message: "Используйте интерфейс загрузки CSV для импорта." };
 }

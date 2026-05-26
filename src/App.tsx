@@ -32,7 +32,8 @@ import {
   fetchUsersReal, 
   toggleUserActiveReal, 
   deleteUserReal, 
-  importUsersReal 
+  importUsersReal,
+  updateUserReal
 } from "./api";
 
 import LoginScreen from "./components/LoginScreen";
@@ -209,8 +210,10 @@ export default function App() {
 
     if (useRealApi && isRealConnected) {
       try {
-        await toggleUserActiveReal(updatedUser.id, updatedUser.user_id, updatedUser.is_active);
-      } catch (e) {
+        await updateUserReal(updatedUser.user_id, updatedUser.tags, updatedUser.is_active);
+      } catch (err: any) {
+        alert("Ошибка обновления пользователя на сервере VPS: " + err.message);
+        loadBotData();
       }
     } else {
       saveUsersToStorage(updated);

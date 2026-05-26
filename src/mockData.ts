@@ -12,7 +12,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Екатерина",
     username: "katya_migel",
     is_active: true,
-    tags: ["money_and_succes"],
+    tags: ["chain_money_meditation"],
     created_at: "2026-05-20 14:22:10",
   },
   {
@@ -21,7 +21,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Александр",
     username: "sasha_psy",
     is_active: true,
-    tags: ["ideal_day"],
+    tags: ["chain_ideal_day"],
     created_at: "2026-05-21 09:15:33",
   },
   {
@@ -30,7 +30,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Анна",
     username: "anna_energy",
     is_active: true,
-    tags: ["energy"],
+    tags: ["chain_energy"],
     created_at: "2026-05-22 18:45:00",
   },
   {
@@ -39,7 +39,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Дмитрий",
     username: "dima_step",
     is_active: false,
-    tags: ["little_step"],
+    tags: ["chain_little_step"],
     created_at: "2026-05-18 11:30:12",
   },
   {
@@ -48,7 +48,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Мария",
     username: "masha_brand",
     is_active: true,
-    tags: ["money_and_succes"],
+    tags: ["chain_money_meditation"],
     created_at: "2026-05-23 08:12:45",
   },
   {
@@ -57,7 +57,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Иван",
     username: "ivan_novikov",
     is_active: true,
-    tags: ["energy", "ideal_day"],
+    tags: ["chain_energy", "chain_ideal_day"],
     created_at: "2026-05-19 20:05:11",
   },
   {
@@ -66,7 +66,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Ольга",
     username: "olga_light",
     is_active: false,
-    tags: ["little_step"],
+    tags: ["chain_little_step"],
     created_at: "2026-05-15 16:34:55",
   },
   {
@@ -75,7 +75,7 @@ export const DEFAULT_USERS: BotUser[] = [
     first_name: "Сергей",
     username: undefined,
     is_active: true,
-    tags: ["money_and_succes"],
+    tags: ["chain_money_meditation"],
     created_at: "2026-05-23 10:11:00",
   }
 ];
