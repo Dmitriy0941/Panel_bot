@@ -19,8 +19,38 @@ interface UserModalProps {
 export default function UserModal({ user, onClose, onUpdateUser, useRealApi = false, isRealConnected = false }: UserModalProps) {
   const [newTag, setNewTag] = useState("");
   const [msgText, setMsgText] = useState("");
+  const [mediaType, setMediaType] = useState<"" | "photo" | "document" | "audio" | "video">("");
+  const [mediaFile, setMediaFile] = useState("");
+  const [mediaSource, setMediaSource] = useState<"url" | "device">("url");
+  const [fileName, setFileName] = useState("");
   const [sentStatus, setSentStatus] = useState(false);
   const [sending, setSending] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+
+    // Определяем тип медиа по MIME-типу файла
+    if (file.type.startsWith("image/")) {
+      setMediaType("photo");
+    } else if (file.type.startsWith("video/")) {
+      setMediaType("video");
+    } else if (file.type.startsWith("audio/")) {
+      setMediaType("audio");
+    } else {
+      setMediaType("document");
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setMediaFile(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleToggleActive = () => {
     onUpdateUser({
@@ -59,7 +89,9 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
         await sendMailingReal({
           text: msgText,
           target: "users",
-          user_ids: [user.user_id]
+          user_ids: [user.user_id],
+          media_type: mediaType !== "" ? mediaType : undefined,
+          media_file: mediaType !== "" ? mediaFile : undefined
         });
         setSending(false);
         setSentStatus(true);
@@ -230,7 +262,119 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
               Отправка тестового Push-сообщения
             </div>
             
-            <form onSubmit={handleSendMessage} className="space-y-2">
+            <form onSubmit={handleSendMessage} className="space-y-3">
+              {/* Media Attachment Selector */}
+              <div className="space-y-2 bg-black/20 p-3 rounded-2xl border border-white/5">
+                <span className="block text-[9px] font-bold text-white/40 uppercase tracking-widest font-mono">
+                  Прикрепить медиафайл (опционально):
+                </span>
+                
+                <div className="grid grid-cols-2 gap-2 bg-black/30 p-1 rounded-xl border border-white/5">
+                  <button
+                    type="button"
+                    disabled={!user.is_active}
+                    onClick={() => { setMediaSource("url"); setMediaType(""); setMediaFile(""); setFileName(""); }}
+                    className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
+                      mediaSource === "url" 
+                        ? "bg-indigo-500 text-white shadow-sm" 
+                        : "text-white/40 hover:text-white/70 disabled:opacity-30"
+                    }`}
+                  >
+                    По ссылке / ID
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!user.is_active}
+                    onClick={() => { setMediaSource("device"); setMediaType(""); setMediaFile(""); setFileName(""); }}
+                    className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
+                      mediaSource === "device" 
+                        ? "bg-indigo-500 text-white shadow-sm" 
+                        : "text-white/40 hover:text-white/70 disabled:opacity-30"
+                    }`}
+                  >
+                    Загрузить с устройства
+                  </button>
+                </div>
+
+                {mediaSource === "url" ? (
+                  <>
+                    <div className="grid grid-cols-5 gap-1 p-1 bg-black/35 rounded-xl border border-white/5">
+                      {[
+                        { id: "", label: "Без медиа" },
+                        { id: "photo", label: "Фото" },
+                        { id: "document", label: "Файл" },
+                        { id: "audio", label: "Аудио" },
+                        { id: "video", label: "Видео" }
+                      ].map(item => (
+                        <button
+                          type="button"
+                          key={item.id}
+                          disabled={!user.is_active}
+                          onClick={() => setMediaType(item.id as any)}
+                          className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
+                            mediaType === item.id 
+                              ? "bg-indigo-500 text-white shadow-sm" 
+                              : "text-white/40 hover:text-white/70 hover:bg-white/5 disabled:opacity-30"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {mediaType !== "" && user.is_active && (
+                      <div className="space-y-1 animate-fade-in pt-1">
+                        <label className="block text-[8px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                          Telegram File ID или прямая URL ссылка:
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={mediaFile}
+                          onChange={(e) => setMediaFile(e.target.value)}
+                          placeholder={
+                            mediaType === "photo" ? "AgACAgIAAxkBAAIB... или https://site.com/image.jpg" :
+                            mediaType === "document" ? "BQACAgIAAxkBAAIC... или https://site.com/document.pdf" :
+                            mediaType === "audio" ? "CQACAgIAAxkBAAID... или https://site.com/audio.mp3" :
+                            "BAACAgIAAxkBAAIE... или https://site.com/video.mp4"
+                          }
+                          className="w-full p-2 bg-white/[0.02] border border-white/10 rounded-xl text-[10px] outline-none focus:ring-1 focus:ring-indigo-500 text-white placeholder-white/20 font-mono"
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-2 pt-1 animate-fade-in">
+                    <label className="block text-[8px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                      Выберите файл с вашего ноутбука или смартфона:
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <label className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-all cursor-pointer select-none">
+                        Выбрать файл
+                        <input
+                          type="file"
+                          accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <span className="text-[10px] text-white/60 truncate font-medium max-w-[150px]">
+                        {fileName ? fileName : "Файл не выбран"}
+                      </span>
+                    </div>
+                    {mediaType !== "" && (
+                      <span className="text-[8px] text-emerald-400 font-bold block mt-1 font-mono">
+                        ✓ Файл: {
+                          mediaType === "photo" ? "ИЗОБРАЖЕНИЕ" :
+                          mediaType === "video" ? "ВИДЕО" :
+                          mediaType === "audio" ? "АУДИО" : "ДОКУМЕНТ"
+                        }
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <textarea
                 placeholder="Напишите текст, чтобы мгновенно протестировать отправку этого сообщения..."
                 value={msgText}

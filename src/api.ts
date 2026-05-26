@@ -165,6 +165,8 @@ export interface MailingPayload {
   target: "all" | "tags" | "users";
   tags?: string[];
   user_ids?: number[];
+  media_type?: string;
+  media_file?: string;
 }
 
 // 2. Toggle active status

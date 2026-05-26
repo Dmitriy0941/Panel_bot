@@ -19,10 +19,40 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
   const [targetMode, setTargetMode] = useState<"all" | "tags" | "users">("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [targetUserIds, setTargetUserIds] = useState("");
+  const [mediaType, setMediaType] = useState<"" | "photo" | "document" | "audio" | "video">("");
+  const [mediaFile, setMediaFile] = useState("");
+  const [mediaSource, setMediaSource] = useState<"url" | "device">("url");
+  const [fileName, setFileName] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [progress, setProgress] = useState({ current: 0, total: 0 });
   const [completed, setCompleted] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setFileName(file.name);
+
+    // Определяем тип медиа по MIME-типу файла
+    if (file.type.startsWith("image/")) {
+      setMediaType("photo");
+    } else if (file.type.startsWith("video/")) {
+      setMediaType("video");
+    } else if (file.type.startsWith("audio/")) {
+      setMediaType("audio");
+    } else {
+      setMediaType("document");
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setMediaFile(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Extract unique tags and count users
   const tagCounts: { [key: string]: number } = {};
@@ -107,7 +137,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
           text: message,
           target: targetMode,
           tags: targetMode === "tags" ? selectedTags : undefined,
-          user_ids: targetMode === "users" ? parsedIds : undefined
+          user_ids: targetMode === "users" ? parsedIds : undefined,
+          media_type: mediaType !== "" ? mediaType : undefined,
+          media_file: mediaType !== "" ? mediaFile : undefined
         };
 
         await sendMailingReal(payload);
@@ -326,6 +358,118 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   </span>
                 </div>
               )}
+
+              {/* Media Attachment Selector */}
+              <div className="space-y-3 bg-black/20 p-4.5 rounded-2xl border border-white/5">
+                <span className="block text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
+                  Прикрепить медиафайл (опционально):
+                </span>
+                
+                <div className="grid grid-cols-2 gap-2 bg-black/30 p-1 rounded-xl border border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => { setMediaSource("url"); setMediaType(""); setMediaFile(""); setFileName(""); }}
+                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                      mediaSource === "url" 
+                        ? "bg-indigo-500 text-white shadow-sm" 
+                        : "text-white/40 hover:text-white/70"
+                    }`}
+                  >
+                    По ссылке / ID
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setMediaSource("device"); setMediaType(""); setMediaFile(""); setFileName(""); }}
+                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                      mediaSource === "device" 
+                        ? "bg-indigo-500 text-white shadow-sm" 
+                        : "text-white/40 hover:text-white/70"
+                    }`}
+                  >
+                    Загрузить с устройства
+                  </button>
+                </div>
+
+                {mediaSource === "url" ? (
+                  <>
+                    <div className="grid grid-cols-5 gap-1 p-1 bg-black/35 rounded-xl border border-white/5">
+                      {[
+                        { id: "", label: "Без медиа" },
+                        { id: "photo", label: "Фото" },
+                        { id: "document", label: "Файл" },
+                        { id: "audio", label: "Аудио" },
+                        { id: "video", label: "Видео" }
+                      ].map(item => (
+                        <button
+                          type="button"
+                          key={item.id}
+                          onClick={() => setMediaType(item.id as any)}
+                          className={`py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                            mediaType === item.id 
+                              ? "bg-indigo-500 text-white shadow-sm" 
+                              : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {mediaType !== "" && (
+                      <div className="space-y-1.5 animate-fade-in pt-1">
+                        <label className="block text-[9px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                          Telegram File ID или прямая URL ссылка:
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={mediaFile}
+                          onChange={(e) => setMediaFile(e.target.value)}
+                          placeholder={
+                            mediaType === "photo" ? "AgACAgIAAxkBAAIB... или https://site.com/image.jpg" :
+                            mediaType === "document" ? "BQACAgIAAxkBAAIC... или https://site.com/document.pdf" :
+                            mediaType === "audio" ? "CQACAgIAAxkBAAID... или https://site.com/audio.mp3" :
+                            "BAACAgIAAxkBAAIE... или https://site.com/video.mp4"
+                          }
+                          className="w-full p-2.5 bg-white/[0.02] border border-white/10 rounded-xl text-[11px] outline-none focus:ring-1 focus:ring-indigo-500 text-white placeholder-white/20 font-mono"
+                        />
+                        <span className="text-[9px] text-white/30 block leading-tight font-normal">
+                          💡 <b>Совет:</b> Самый быстрый способ получить <code>file_id</code> — переслать медиафайл вашему боту в Telegram. Бот автоматически вернет готовый ID для вставки!
+                        </span>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-2 pt-1 animate-fade-in">
+                    <label className="block text-[9px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                      Выберите файл с вашего ноутбука или смартфона:
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <label className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer select-none">
+                        Выбрать файл
+                        <input
+                          type="file"
+                          accept="image/*,video/*,audio/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                          onChange={handleFileChange}
+                          className="hidden"
+                        />
+                      </label>
+                      <span className="text-[11px] text-white/60 truncate font-medium">
+                        {fileName ? fileName : "Файл не выбран"}
+                      </span>
+                    </div>
+                    {mediaType !== "" && (
+                      <span className="text-[9px] text-emerald-400 font-bold block mt-1 font-mono">
+                        ✓ Файл распознан как: {
+                          mediaType === "photo" ? "ИЗОБРАЖЕНИЕ" :
+                          mediaType === "video" ? "ВИДЕОРОЛИК" :
+                          mediaType === "audio" ? "АУДИОФАЙЛ" : "ДОКУМЕНТ"
+                        }
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Message Payload */}
               <div className="space-y-1.5">
