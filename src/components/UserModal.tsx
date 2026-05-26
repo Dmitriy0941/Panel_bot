@@ -82,10 +82,18 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
   // Human-readable labels for specific funnel tags
   const getTagLabel = (tag: string) => {
     switch (tag) {
-      case "money_and_succes": return "Медитация «Деньги и успех»";
-      case "ideal_day": return "Медитация «Идеальный день»";
-      case "little_step": return "Гайд «Маленькие шаги»";
-      case "energy": return "Гайд «Энергия»";
+      case "chain_money_meditation":
+      case "money_and_succes": 
+        return "Медитация «Деньги и успех»";
+      case "chain_ideal_day":
+      case "ideal_day": 
+        return "Медитация «Идеальный день»";
+      case "chain_little_step":
+      case "little_step": 
+        return "Гайд «Маленькие шаги»";
+      case "chain_energy":
+      case "energy": 
+        return "Гайд «Энергия»";
       default: return tag;
     }
   };

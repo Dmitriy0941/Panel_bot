@@ -19,18 +19,10 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
   const [tagFilter, setTagFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
-  // Наше строгое сито для нужных полосок
-  const ALLOWED_TAGS = [
-    "chain_money_meditation",
-    "chain_energy",
-    "chain_little_step",
-    "chain_ideal_day"
-  ];
-
-  // Собираем список тегов для выпадающего меню фильтра
+  // Собираем список тегов для выпадающего меню фильтра, исключая служебные
   const allTags = Array.from(
     new Set(users.flatMap(u => u.tags))
-  ).filter(tag => ALLOWED_TAGS.includes(tag));
+  ).filter(tag => !tag.startsWith("received_") && tag !== "received_lead");
 
   // Логика фильтрации таблицы
   const filteredUsers = users.filter(user => {
@@ -61,10 +53,18 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
   // Электронный словарик
   const getTagLabel = (tag: string) => {
     switch (tag) {
-      case "chain_money_meditation": return "Медитация Деньги и успех";
-      case "chain_ideal_day": return "Медитация Идеальный день";
-      case "chain_little_step": return "Гайд Магия маленьких шагов";
-      case "chain_energy": return "Гайд Почему нет энергии";
+      case "chain_money_meditation":
+      case "money_and_succes": 
+        return "Медитация «Деньги и успех»";
+      case "chain_ideal_day":
+      case "ideal_day": 
+        return "Медитация «Идеальный день»";
+      case "chain_little_step":
+      case "little_step": 
+        return "Гайд «Маленькие шаги»";
+      case "chain_energy":
+      case "energy": 
+        return "Гайд «Энергия»";
       default: return tag;
     }
   };
@@ -190,11 +190,11 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
 
                   <td className="px-5 py-4">
                     <div className="flex flex-wrap gap-1 max-w-[280px]">
-                      {user.tags.filter(t => ALLOWED_TAGS.includes(t)).length === 0 ? (
+                      {user.tags.filter(t => !t.startsWith("received_") && t !== "received_lead").length === 0 ? (
                         <span className="text-white/30 italic text-[10px]">нет воронки</span>
                       ) : (
                         user.tags
-                          .filter(t => ALLOWED_TAGS.includes(t))
+                          .filter(t => !t.startsWith("received_") && t !== "received_lead")
                           .map(tag => (
                             <span 
                               key={tag} 

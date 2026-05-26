@@ -32,16 +32,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
     });
   });
 
-  // Наше строгое сито для нужных полосок
-  const ALLOWED_TAGS = [
-    "chain_money_meditation",
-    "chain_energy",
-    "chain_little_step",
-    "chain_ideal_day"
-  ];
-
+  // Фильтруем только служебные теги выдачи лидов (начинающиеся с received_), оставляя все воронки и произвольные теги для рассылки
   const availableTags = Object.keys(tagCounts)
-    .filter(tag => ALLOWED_TAGS.includes(tag))
+    .filter(tag => !tag.startsWith("received_") && tag !== "received_lead")
     .map(tag => ({
       name: tag,
       count: tagCounts[tag]
