@@ -40,6 +40,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     let usernameIdx = -1;
     let nameIdx = -1;
     let tagsIdx = -1;
+    let phoneIdx = -1;
+    let emailIdx = -1;
 
     const idHeaders = [
       "platform_id", "идентификатор на платформе", "идентификатор пользователя", 
@@ -49,6 +51,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     const usernameHeaders = ["username", "nik", "ник", "nickname", "логин", "username на платформе", "никнейм"];
     const nameHeaders = ["first_name", "name", "имя", "fio", "фио", "first name", "имя пользователя"];
     const tagsHeaders = ["tags", "теги", "сегменты", "группы", "tag", "тег"];
+    const phoneHeaders = ["phone", "телефон", "номер телефона", "tel", "телефон пользователя", "мобильный"];
+    const emailHeaders = ["email", "e-mail", "почта", "email пользователя", "mail", "почта пользователя", "s"];
 
     for (let i = 0; i < headers.length; i++) {
       const h = headers[i];
@@ -56,6 +60,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       if (usernameIdx === -1 && usernameHeaders.includes(h)) usernameIdx = i;
       if (nameIdx === -1 && nameHeaders.includes(h)) nameIdx = i;
       if (tagsIdx === -1 && tagsHeaders.includes(h)) tagsIdx = i;
+      if (phoneIdx === -1 && phoneHeaders.includes(h)) phoneIdx = i;
+      if (emailIdx === -1 && emailHeaders.includes(h)) emailIdx = i;
     }
 
     // Additional fuzzy matching for ID
@@ -114,6 +120,41 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       }
     }
     
+    // Dynamic value-scanning heuristics for Email and Phone columns if not matched by headers
+    if (emailIdx === -1) {
+      // Try exact find for 's' column
+      emailIdx = headers.findIndex(h => h === "s");
+      if (emailIdx === -1) {
+        for (let col = 0; col < headers.length; col++) {
+          if (col === idIdx || col === usernameIdx || col === nameIdx || col === tagsIdx || col === phoneIdx) continue;
+          for (let r = 1; r < Math.min(lines.length, 10); r++) {
+            const cells = lines[r]?.split(regex) || [];
+            const cellVal = cells[col]?.replace(/"/g, "").trim() || "";
+            if (cellVal && cellVal.includes("@") && cellVal.includes(".") && !cellVal.startsWith("@") && cellVal.length > 4) {
+              emailIdx = col;
+              break;
+            }
+          }
+          if (emailIdx !== -1) break;
+        }
+      }
+    }
+
+    if (phoneIdx === -1) {
+      for (let col = 0; col < headers.length; col++) {
+        if (col === idIdx || col === usernameIdx || col === nameIdx || col === tagsIdx || col === emailIdx) continue;
+        for (let r = 1; r < Math.min(lines.length, 10); r++) {
+          const cells = lines[r]?.split(regex) || [];
+          const cellVal = cells[col]?.replace(/"/g, "").replace(/[-+\s()]/g, "").trim() || "";
+          if (cellVal && /^\d+$/.test(cellVal) && cellVal.length >= 7 && cellVal.length <= 15) {
+            phoneIdx = col;
+            break;
+          }
+        }
+        if (phoneIdx !== -1) break;
+      }
+    }
+    
     // Default indices if mapping failed completely
     if (idIdx === -1) idIdx = 0;
     if (nameIdx === -1) nameIdx = 1;
@@ -138,6 +179,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       let rUsername = currentline[usernameIdx]?.replace(/"/g, "").replace("@", "").trim() || "";
       let rFirstName = currentline[nameIdx]?.replace(/"/g, "").trim() || "";
       let rTagsStr = currentline[tagsIdx]?.replace(/"/g, "").trim() || "";
+      let rPhone = phoneIdx !== -1 ? currentline[phoneIdx]?.replace(/"/g, "").trim() || "" : "";
+      let rEmail = emailIdx !== -1 ? currentline[emailIdx]?.replace(/"/g, "").trim() || "" : "";
 
       // Parse tags separated by comma, semicolon, or vertical bar
       const tags = rTagsStr
@@ -149,6 +192,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
         user_id: userId,
         first_name: rFirstName || undefined,
         username: rUsername || undefined,
+        phone: rPhone || undefined,
+        email: rEmail || undefined,
         is_active: true,
         tags: tags,
         created_at: new Date().toISOString().replace("T", " ").substring(0, 19),
@@ -164,9 +209,11 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
         // Merge tags, ensuring uniqueness
         const mergedTags = Array.from(new Set([...(existing.tags || []), ...(u.tags || [])]));
         existing.tags = mergedTags;
-        // Merge names and usernames if missing
+        // Merge names, usernames, phones, and emails if missing
         if (!existing.username && u.username) existing.username = u.username;
         if (!existing.first_name && u.first_name) existing.first_name = u.first_name;
+        if (!existing.phone && u.phone) existing.phone = u.phone;
+        if (!existing.email && u.email) existing.email = u.email;
       } else {
         uniqueUsersMap.set(u.user_id, u);
       }
@@ -243,7 +290,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
   const exportToCSV = () => {
     if (users.length === 0) return;
     
-    const headers = ["user_id", "username", "first_name", "tags", "is_active", "created_at"];
+    const headers = ["user_id", "username", "first_name", "tags", "phone", "email", "is_active", "created_at"];
     const csvRows = [headers.join(",")];
 
     users.forEach(u => {
@@ -252,6 +299,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
         u.username ? `${u.username}` : "",
         u.first_name ? `"${u.first_name.replace(/"/g, '""')}"` : "",
         `"${u.tags.join("|")}"`,
+        u.phone ? `"${u.phone}"` : "",
+        u.email ? `"${u.email}"` : "",
         u.is_active ? "1" : "0",
         `"${u.created_at}"`
       ];

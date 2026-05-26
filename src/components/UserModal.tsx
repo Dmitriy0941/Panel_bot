@@ -26,6 +26,12 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
   const [sentStatus, setSentStatus] = useState(false);
   const [sending, setSending] = useState(false);
 
+  // States for editable contact details
+  const [firstName, setFirstName] = useState(user.first_name || "");
+  const [phone, setPhone] = useState(user.phone || "");
+  const [email, setEmail] = useState(user.email || "");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -163,21 +169,88 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
           
           {/* User Information Stats */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 space-y-1">
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
                 <Calendar className="w-3.5 h-3.5 text-indigo-400" />
                 Дата входа
               </span>
               <span className="text-xs font-semibold text-white/95 break-all font-mono">{user.created_at}</span>
             </div>
-            <div className="bg-white/[0.02] p-4 rounded-2xl border border-white/5 space-y-1">
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                <Landmark className="w-3.5 h-3.5 text-sky-450" />
+                <Landmark className="w-3.5 h-3.5 text-sky-400" />
                 Telegram ID
               </span>
               <span className="text-xs font-bold text-sky-300 break-all font-mono">{user.user_id}</span>
             </div>
+            
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-2">
+              <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest block font-mono">
+                Имя лида
+              </span>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
+                placeholder="Имя не указано"
+              />
+            </div>
+            
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
+              <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest block font-mono">
+                Телефон
+              </span>
+              <input
+                type="text"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-medium"
+                placeholder="не указан"
+              />
+            </div>
+            
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
+              <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest block font-mono">
+                E-mail
+              </span>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-sky-300 outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-medium"
+                placeholder="не указан"
+              />
+            </div>
           </div>
+
+          {/* Save Profile Button (reveals on change) */}
+          {(firstName !== (user.first_name || "") || 
+            phone !== (user.phone || "") || 
+            email !== (user.email || "")) && (
+            <button
+              onClick={async () => {
+                setSaveStatus("saving");
+                try {
+                  await onUpdateUser({
+                    ...user,
+                    first_name: firstName.trim() || undefined,
+                    phone: phone.trim() || undefined,
+                    email: email.trim() || undefined,
+                  });
+                  setSaveStatus("saved");
+                  setTimeout(() => setSaveStatus("idle"), 2000);
+                } catch (e) {
+                  setSaveStatus("idle");
+                  alert("Не удалось сохранить данные профиля.");
+                }
+              }}
+              disabled={saveStatus === "saving"}
+              className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-[0.99] cursor-pointer"
+            >
+              {saveStatus === "saving" ? "Сохранение..." : saveStatus === "saved" ? "✓ Успешно сохранено!" : "Сохранить изменения в профиле"}
+            </button>
+          )}
 
           {/* Status Switcher & Info */}
           <div className="p-4 rounded-2xl border border-white/10 bg-white/[0.01] flex items-center justify-between">

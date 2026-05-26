@@ -152,6 +152,8 @@ export async function fetchUsersReal(): Promise<BotUser[]> {
       user_id: Number(u.user_id),
       first_name: u.first_name || "Без имени",
       username: u.username || undefined,
+      phone: u.phone || undefined,
+      email: u.email || undefined,
       is_active: u.is_active !== undefined ? u.is_active : true,
       tags: Array.isArray(u.tags) ? u.tags : [],
       created_at: u.created_at || new Date().toISOString().replace('T', ' ').substring(0, 19),
@@ -193,12 +195,14 @@ export async function sendMailingReal(payload: MailingPayload): Promise<{ succes
 }
 
 // 4.1 Update user tags and active state
-export async function updateUserReal(user_id: number, tags: string[], is_active?: boolean): Promise<any> {
+export async function updateUserReal(user_id: number, tags: string[], is_active?: boolean, phone?: string, email?: string): Promise<any> {
   return await apiRequest(`/api/users/${user_id}`, {
     method: "PATCH",
     body: JSON.stringify({
       tags,
       ...(is_active !== undefined ? { is_active } : {}),
+      ...(phone !== undefined ? { phone } : {}),
+      ...(email !== undefined ? { email } : {}),
     }),
   });
 }
@@ -212,7 +216,7 @@ export async function cleanupBlockedUsersReal(): Promise<{ success: boolean; mes
 
 // 5. Bulk Import users via CSV to FastAPI
 export async function importUsersReal(users: BotUser[]): Promise<any> {
-  const headers = ["user_id", "username", "first_name", "tags"];
+  const headers = ["user_id", "username", "first_name", "tags", "phone", "email"];
   const csvRows = [headers.join(",")];
 
   users.forEach(u => {
@@ -220,7 +224,9 @@ export async function importUsersReal(users: BotUser[]): Promise<any> {
       u.user_id,
       u.username ? `${u.username}` : "",
       u.first_name ? `"${u.first_name.replace(/"/g, '""')}"` : "",
-      `"${u.tags.join(",")}"`
+      `"${u.tags.join(",")}"`,
+      u.phone ? `"${u.phone}"` : "",
+      u.email ? `"${u.email}"` : ""
     ];
     csvRows.push(row.join(","));
   });

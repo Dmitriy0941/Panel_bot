@@ -8,6 +8,8 @@ export interface BotUser {
   user_id: number; // Telegram UID
   first_name?: string;
   username?: string;
+  phone?: string;
+  email?: string;
   is_active: boolean; // subscribed vs blocked
   tags: string[];
   created_at: string; // ISO date or formatted

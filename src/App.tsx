@@ -267,7 +267,7 @@ export default function App() {
 
     if (useRealApi && isRealConnected) {
       try {
-        await updateUserReal(updatedUser.user_id, updatedUser.tags, updatedUser.is_active);
+        await updateUserReal(updatedUser.user_id, updatedUser.tags, updatedUser.is_active, updatedUser.phone, updatedUser.email);
       } catch (err: any) {
         alert("Ошибка обновления пользователя на сервере VPS: " + err.message);
         loadBotData();
