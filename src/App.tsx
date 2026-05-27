@@ -293,23 +293,49 @@ export default function App() {
 
   const dashboardStats = calculateStats(users, startDate, endDate);
 
-  const getTagDescription = (tag: string) => {
-    if (tag === "chain_money_meditation") return "Медитация Деньги и успех";
-    if (tag === "chain_energy") return "Гайд Почему нет энергии";
-    if (tag === "chain_little_step") return "Гайд Магия маленьких шагов";
-    if (tag === "chain_ideal_day") return "Медитация Идеальный день";
-    return tag;
+  // Filter users by date to match the stats filters
+  const getFilteredUsers = () => {
+    let filtered = [...users];
+    if (startDate) {
+      const start = new Date(startDate);
+      filtered = filtered.filter(u => new Date(u.created_at) >= start);
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filtered = filtered.filter(u => new Date(u.created_at) <= end);
+    }
+    return filtered;
   };
 
-  // Наше строгое сито для нужных полосок
-  const ALLOWED_TAGS = [
-    "chain_money_meditation",
-    "chain_energy",
-    "chain_little_step",
-    "chain_ideal_day"
-  ];
-  
-  const filteredTagsForCharts = dashboardStats.tags.filter(t => ALLOWED_TAGS.includes(t.tag));
+  const filteredUsersForStats = getFilteredUsers();
+
+  const groupedTags = [
+    {
+      id: "money",
+      label: "Медитация Деньги и успех",
+      count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_money_meditation" || t === "money_and_succes")).length,
+      gradient: "from-emerald-400 to-teal-500"
+    },
+    {
+      id: "energy",
+      label: "Гайд Почему нет энергии",
+      count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_energy" || t === "energy")).length,
+      gradient: "from-pink-400 to-fuchsia-500"
+    },
+    {
+      id: "step",
+      label: "Гайд Магия маленьких шагов",
+      count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_little_step" || t === "little_step")).length,
+      gradient: "from-amber-400 to-orange-500"
+    },
+    {
+      id: "ideal_day",
+      label: "Медитация Идеальный день",
+      count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_ideal_day" || t === "ideal_day")).length,
+      gradient: "from-indigo-400 to-purple-500"
+    }
+  ].sort((a, b) => b.count - a.count);
 
   if (!isLoggedIn) {
     return (
@@ -670,22 +696,17 @@ export default function App() {
             </div>
 
             <div className="space-y-4 relative z-10 my-4 flex-1">
-              {filteredTagsForCharts.length === 0 ? (
+              {groupedTags.length === 0 ? (
                 <div className="text-center py-8 text-xs text-white/40 italic">Основные теги не найдены в базе данных</div>
               ) : (
-                filteredTagsForCharts.map(t => {
+                groupedTags.map(t => {
                   const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 105);
                   const safePercentage = Math.min(percentage, 100);
-                  
-                  const barGradient = t.tag.includes("money") ? "from-emerald-400 to-teal-500" :
-                                      t.tag.includes("ideal") ? "from-indigo-400 to-purple-500" :
-                                      t.tag.includes("step") ? "from-amber-400 to-orange-500" :
-                                      t.tag.includes("energy") ? "from-pink-400 to-fuchsia-500" : "from-sky-400 to-blue-500";
 
                   return (
-                    <div key={t.tag} className="space-y-1.5">
+                    <div key={t.id} className="space-y-1.5">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-white/80">{getTagDescription(t.tag)}</span>
+                        <span className="font-semibold text-white/80">{t.label}</span>
                         <div className="flex items-center gap-1.5 font-bold">
                           <span className="text-white/40 font-mono">({t.count} чел.)</span>
                           <span className="text-sky-300 font-bold font-mono">{safePercentage}%</span>
@@ -697,7 +718,7 @@ export default function App() {
                           initial={{ width: 0 }}
                           animate={{ width: `${safePercentage}%` }}
                           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                          className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
+                          className={`h-full rounded-full bg-gradient-to-r ${t.gradient}`}
                         ></motion.div>
                       </div>
                     </div>
