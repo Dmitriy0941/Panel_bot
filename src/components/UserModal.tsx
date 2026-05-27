@@ -152,7 +152,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 {user.first_name || "Лид без имени"}
               </h3>
               <p className="text-[11px] text-sky-300 font-semibold font-mono">
-                {user.username ? `@${user.username}` : "TG UID: " + user.user_id}
+                {user.username ? `@${user.username}` : "Никнейм: скрыт"}
               </p>
             </div>
           </div>
@@ -182,6 +182,27 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 Telegram ID
               </span>
               <span className="text-xs font-bold text-sky-300 break-all font-mono">{user.user_id}</span>
+            </div>
+            
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-2">
+              <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
+                <User className="w-3.5 h-3.5 text-indigo-405" />
+                Никнейм в Telegram (Username)
+              </span>
+              <span className="text-xs font-bold font-mono block pt-0.5">
+                {user.username ? (
+                  <a 
+                    href={`https://t.me/${user.username}`} 
+                    target="_blank" 
+                    rel="noreferrer"
+                    className="text-sky-400 hover:text-sky-300 hover:underline"
+                  >
+                    @{user.username}
+                  </a>
+                ) : (
+                  <span className="text-white/30 italic">скрыт</span>
+                )}
+              </span>
             </div>
             
             <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-2">
