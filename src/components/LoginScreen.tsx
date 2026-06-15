@@ -69,15 +69,15 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     >
       
       {/* Decorative Gradient Background */}
-      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl pointer-events-none"></div>
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-56 w-56 rounded-full bg-[#FF7F11]/15 blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 -ml-24 -mb-24 h-56 w-56 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
 
       {/* Header Decorator */}
       <div className="p-8 border-b border-white/10 relative z-10 bg-gradient-to-b from-white/[0.02] to-transparent">
         <div className="absolute top-6 right-6 bg-white/5 p-2 rounded-xl ring-1 ring-white/10">
-          <Bot className="w-5 h-5 text-sky-400" />
+          <Bot className="w-5 h-5 text-[#FF7F11]" />
         </div>
-        <div className="flex items-center gap-2 text-sky-300 text-xs font-semibold uppercase tracking-wider mb-2 font-mono">
+        <div className="flex items-center gap-2 text-orange-300 text-xs font-semibold uppercase tracking-wider mb-2 font-mono">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           Вход в систему
         </div>
@@ -108,7 +108,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Введите логин"
-              className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all text-sm font-medium text-white placeholder-white/20"
+              className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 outline-none transition-all text-sm font-medium text-white placeholder-white/20"
               required
             />
           </div>
@@ -126,7 +126,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Введите пароль"
-              className="w-full pl-10 pr-12 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 outline-none transition-all text-sm font-medium text-white placeholder-white/20"
+              className="w-full pl-10 pr-12 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 outline-none transition-all text-sm font-medium text-white placeholder-white/20"
               required
             />
             <button
@@ -142,7 +142,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide shadow-lg active:scale-95 disabled:opacity-50 mt-2 cursor-pointer"
+          className="w-full bg-gradient-to-r from-[#FF7F11] to-amber-500 hover:from-[#E06A0B] hover:to-amber-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide shadow-lg shadow-orange-500/10 active:scale-[0.96] transition-transform disabled:opacity-50 mt-2 cursor-pointer border border-[#FF7F11]/20"
         >
           {loading ? "Администрирование..." : "Войти в систему"}
           <ArrowRight className="w-4 h-4" />
@@ -152,13 +152,13 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           <div className="absolute inset-0 flex items-center">
             <div className="w-full border-t border-white/10"></div>
           </div>
-          <span className="relative bg-[#030014] px-3.5 text-[9px] text-white/30 font-bold tracking-widest uppercase">ИЛИ ИСПЫТАТЬ</span>
+          <span className="relative bg-[#0B0C10] px-3.5 text-[9px] text-white/30 font-bold tracking-widest uppercase">ИЛИ ИСПЫТАТЬ</span>
         </div>
 
         <button
           type="button"
           onClick={handleQuickDemo}
-          className="w-full border border-white/10 hover:border-sky-500/40 hover:bg-white/5 bg-transparent text-white/80 font-semibold py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full border border-white/10 hover:border-[#FF7F11]/40 hover:bg-white/5 bg-transparent text-white/80 font-semibold py-2.5 rounded-xl transition-all text-xs flex items-center justify-center gap-2 cursor-pointer active:scale-[0.96] transition-transform"
         >
           Войти как демонстратор (демо)
         </button>

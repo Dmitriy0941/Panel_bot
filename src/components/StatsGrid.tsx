@@ -45,9 +45,9 @@ export default function StatsGrid({
         
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
           {/* Date Picker container */}
-          <div className="flex items-center gap-3 border border-white/10 rounded-xl px-3.5 py-1.5 bg-white/[0.02] hover:bg-white/[0.04] focus-within:ring-2 focus-within:ring-sky-500/20 focus-within:border-sky-500/40 transition-all text-xs font-semibold text-white/70 w-full sm:w-auto justify-between">
+          <div className="flex items-center gap-3 border border-white/10 rounded-xl px-3.5 py-1.5 bg-white/[0.02] hover:bg-white/[0.04] focus-within:ring-2 focus-within:ring-[#FF7F11]/25 focus-within:border-[#FF7F11]/50 transition-all text-xs font-semibold text-white/70 w-full sm:w-auto justify-between">
             <span className="text-white/40 flex items-center gap-1.5">
-              <CalendarRange className="w-3.5 h-3.5 text-sky-400" />
+              <CalendarRange className="w-3.5 h-3.5 text-[#FF7F11]" />
               Период:
             </span>
             <div className="flex items-center gap-2">
@@ -55,7 +55,7 @@ export default function StatsGrid({
                 type="date" 
                 value={startDate} 
                 onChange={(e) => onStartDateChange(e.target.value)}
-                className="bg-transparent border-none outline-none text-white font-semibold cursor-pointer py-0.5 text-xs select-none color-scheme-dark hover:text-sky-300 transition-colors"
+                className="bg-transparent border-none outline-none text-white font-semibold cursor-pointer py-0.5 text-xs select-none color-scheme-dark hover:text-orange-400 transition-colors"
                 style={{ contentVisibility: "auto" }}
               />
               <span className="text-white/20">—</span>
@@ -63,7 +63,7 @@ export default function StatsGrid({
                 type="date" 
                 value={endDate} 
                 onChange={(e) => onEndDateChange(e.target.value)}
-                className="bg-transparent border-none outline-none text-white font-semibold cursor-pointer py-0.5 text-xs select-none color-scheme-dark hover:text-sky-300 transition-colors"
+                className="bg-transparent border-none outline-none text-white font-semibold cursor-pointer py-0.5 text-xs select-none color-scheme-dark hover:text-orange-400 transition-colors"
               />
             </div>
           </div>
@@ -71,7 +71,7 @@ export default function StatsGrid({
           {(startDate || endDate) && (
             <button 
               onClick={onResetDates}
-              className="text-xs text-white/70 hover:text-white bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10 transition-colors cursor-pointer"
+              className="text-xs text-white/70 hover:text-white bg-white/5 hover:bg-white/10 px-3.5 py-2 rounded-xl border border-white/10 transition-all cursor-pointer active:scale-[0.96] transition-transform"
             >
               Сброс
             </button>
@@ -79,10 +79,10 @@ export default function StatsGrid({
 
           <button 
             onClick={onRefresh}
-            className="flex items-center gap-1.5 bg-sky-500/15 text-sky-300 hover:bg-sky-500/20 px-3.5 py-2 rounded-xl text-xs font-semibold border border-sky-500/30 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 bg-[#FF7F11]/15 text-orange-300 hover:bg-[#FF7F11]/25 px-3.5 py-2 rounded-xl text-xs font-semibold border border-[#FF7F11]/30 transition-all cursor-pointer active:scale-[0.96] transition-transform"
             title="Синхронизировать SQLite БД"
           >
-            <RefreshCcw className="w-3.5 h-3.5 text-sky-300" />
+            <RefreshCcw className="w-3.5 h-3.5 text-[#FF7F11]" />
             Обновить
           </button>
         </div>

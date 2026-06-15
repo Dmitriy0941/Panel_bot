@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,8 +6,12 @@
   --font-display: "Space Grotesk", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   
+  --color-brand-orange: #FF7F11;
+  --color-brand-dark: #0B0C10;
+  
   --animate-shimmer: shimmer 2s linear infinite;
-  --animate-pulse-slow: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-pulse-slow: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-fade-in-up: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes shimmer {
@@ -16,8 +20,29 @@
 }
 
 @keyframes pulse-slow {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(1.1); }
+  0%, 100% { opacity: 0.15; transform: scale(1) translate(0, 0); }
+  50% { opacity: 0.35; transform: scale(1.15) translate(2%, 2%); }
+}
+
+@keyframes fade-in-up {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Base custom styles */
+body {
+  background-color: #0B0C10;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Grid overlay background */
+.editorial-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 64px 64px;
 }
 
 /* Custom scrollbar styling for technical tables */
@@ -26,13 +51,41 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.01);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
 }
+
+/* U-Verge Glassmorphism elements */
+.u-glass {
+  background: rgba(13, 14, 18, 0.45);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.u-glass-hover:hover {
+  border-color: rgba(255, 127, 17, 0.25);
+  background: rgba(13, 14, 18, 0.55);
+}
+
+/* Glowing shadow accents */
+.u-glow-orange {
+  box-shadow: 0 0 24px rgba(255, 127, 17, 0.15);
+}
+
+.u-glow-orange-hover:hover {
+  box-shadow: 0 0 32px rgba(255, 127, 17, 0.3);
+}
+
+/* Stagger animation utilities */
+.animate-stagger-1 { animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards; opacity: 0; }
+.animate-stagger-2 { animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.10s forwards; opacity: 0; }
+.animate-stagger-3 { animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards; opacity: 0; }
+.animate-stagger-4 { animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.20s forwards; opacity: 0; }
+.animate-stagger-5 { animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards; opacity: 0; }

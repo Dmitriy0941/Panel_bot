@@ -58,10 +58,10 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
 
   // Палитра красок
   const getTagColorClass = (tag: string) => {
-    if (tag.includes("money")) return "bg-emerald-500/10 text-emerald-300 border-emerald-500/20";
-    if (tag.includes("ideal")) return "bg-purple-500/10 text-purple-300 border-purple-500/20";
-    if (tag.includes("step")) return "bg-amber-500/10 text-amber-300 border-amber-500/20";
-    if (tag.includes("energy")) return "bg-pink-500/10 text-pink-400 border-pink-500/20";
+    if (tag.includes("money")) return "bg-[#FF7F11]/10 text-[#FF7F11] border-[#FF7F11]/20";
+    if (tag.includes("ideal")) return "bg-amber-500/10 text-amber-300 border-amber-500/20";
+    if (tag.includes("step")) return "bg-yellow-500/10 text-yellow-300 border-yellow-500/20";
+    if (tag.includes("energy")) return "bg-orange-400/10 text-orange-300 border-orange-400/20";
     return "bg-white/5 text-white/70 border-white/10";
   };
 
@@ -91,11 +91,11 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
       <div className="p-5 border-b border-white/10 bg-white/[0.01] space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h3 className="text-sm font-bold text-white flex items-center gap-2 font-display">
-            <Sparkles className="w-4.5 h-4.5 text-sky-450" />
+            <Sparkles className="w-4.5 h-4.5 text-[#FF7F11]" />
             База пользователей бота Money Migel
           </h3>
           <span className="text-[11px] text-white/50 font-semibold bg-white/5 px-2.5 py-1 rounded-xl border border-white/10 font-mono">
-            Отображено: <b>{filteredUsers.length}</b> из <b>{users.length}</b> лидов
+            Отображено: <b className="tabular-nums text-white">{filteredUsers.length}</b> из <b className="tabular-nums text-white">{users.length}</b> лидов
           </span>
         </div>
 
@@ -108,7 +108,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
               placeholder="Поиск по имени, @username или ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/25 focus:border-sky-500/40 transition-all font-medium text-white placeholder-white/20"
+              className="w-full pl-10 pr-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 transition-all font-medium text-white placeholder-white/20"
             />
           </div>
 
@@ -117,11 +117,11 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
             <select
               value={tagFilter}
               onChange={(e) => setTagFilter(e.target.value)}
-              className="w-full pl-10 pr-3 py-2.5 bg-[#0a061e] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/25 focus:border-sky-500/40 transition-all font-medium text-white/80 select-style-dark"
+              className="w-full pl-10 pr-3 py-2.5 bg-[#0d0e12] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 transition-all font-medium text-white/80 select-style-dark"
             >
-              <option value="" className="bg-[#0f0b29]">Все воронки (теги)</option>
+              <option value="" className="bg-[#07080b]">Все воронки (теги)</option>
               {allTags.map(tag => (
-                <option key={tag} value={tag} className="bg-[#0f0b29]">{getTagLabel(tag)}</option>
+                <option key={tag} value={tag} className="bg-[#07080b]">{getTagLabel(tag)}</option>
               ))}
             </select>
           </div>
@@ -131,11 +131,11 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-10 pr-3 py-2.5 bg-[#0a061e] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/25 focus:border-sky-500/40 transition-all font-medium text-white/80"
+              className="w-full pl-10 pr-3 py-2.5 bg-[#0d0e12] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 transition-all font-medium text-white/80 select-style-dark"
             >
-              <option value="all" className="bg-[#0f0b29]">Все статусы лидов</option>
-              <option value="active" className="bg-[#0f0b29]">Только активные подписчики</option>
-              <option value="blocked" className="bg-[#0f0b29]">Только заблокировавшие</option>
+              <option value="all" className="bg-[#07080b]">Все статусы лидов</option>
+              <option value="active" className="bg-[#07080b]">Только активные подписчики</option>
+              <option value="blocked" className="bg-[#07080b]">Только заблокировавшие</option>
             </select>
           </div>
 
@@ -146,12 +146,12 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
         <table className="w-full text-left text-xs text-white/85">
           <thead className="bg-white/5 text-white/50 uppercase tracking-widest text-[9px] font-bold border-b border-white/10 font-mono">
             <tr>
-              <th className="px-5 py-3.5">Telegram ID</th>
+              <th className="px-5 py-3.5 hidden md:table-cell">Telegram ID</th>
               <th className="px-5 py-3.5">Имя</th>
-              <th className="px-5 py-3.5">Username</th>
+              <th className="px-5 py-3.5 hidden md:table-cell">Username</th>
               <th className="px-5 py-3.5">Статус подписки</th>
-              <th className="px-5 py-3.5">Пройденные воронки (теги)</th>
-              <th className="px-5 py-3.5">Активация</th>
+              <th className="px-5 py-3.5 hidden sm:table-cell">Пройденные воронки (теги)</th>
+              <th className="px-5 py-3.5 hidden sm:table-cell">Активация</th>
               <th className="px-5 py-3.5 text-right">Действия</th>
             </tr>
           </thead>
@@ -166,21 +166,41 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
               paginatedUsers.map(user => (
                 <tr key={user.id} className="hover:bg-white/[0.02] transition-colors duration-150">
                   
-                  <td className="px-5 py-4 font-bold text-white/40 font-mono text-[11px]">
+                  <td className="px-5 py-4 font-bold text-white/40 font-mono text-[11px] hidden md:table-cell">
                     {user.user_id}
                   </td>
 
-                  <td className="px-5 py-4 font-semibold text-white">
-                    {user.first_name || <span className="text-white/30 italic font-mono">—</span>}
+                  <td className="px-5 py-4">
+                    <span className="font-semibold text-white">
+                      {user.first_name || <span className="text-white/30 italic font-mono">—</span>}
+                    </span>
+                    {/* Secondary stacked info shown only on mobile/tablet */}
+                    <div className="text-[10px] text-white/35 md:hidden font-mono mt-0.5 space-y-0.5 leading-tight">
+                      <div>ID: {user.user_id}</div>
+                      {user.username ? (
+                        <div>
+                          <a 
+                            href={`https://t.me/${user.username}`} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            className="text-[#FF7F11] hover:text-[#E06A0B] font-semibold"
+                          >
+                            @{user.username}
+                          </a>
+                        </div>
+                      ) : (
+                        <div className="text-white/20 italic">username: скрыт</div>
+                      )}
+                    </div>
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 hidden md:table-cell">
                     {user.username ? (
                       <a 
                         href={`https://t.me/${user.username}`} 
                         target="_blank" 
                         rel="noreferrer"
-                        className="text-sky-400 hover:text-sky-300 font-semibold hover:underline"
+                        className="text-[#FF7F11] hover:text-[#E06A0B] font-semibold hover:underline"
                       >
                         @{user.username}
                       </a>
@@ -203,7 +223,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                     )}
                   </td>
 
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 hidden sm:table-cell">
                     <div className="flex flex-wrap gap-1 max-w-[280px]">
                       {user.tags.filter(t => !t.startsWith("received_") && t !== "received_lead").length === 0 ? (
                         <span className="text-white/30 italic text-[10px]">нет воронки</span>
@@ -222,7 +242,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                     </div>
                   </td>
 
-                  <td className="px-5 py-4 text-white/50 font-medium whitespace-nowrap font-mono">
+                  <td className="px-5 py-4 text-white/50 font-medium whitespace-nowrap font-mono hidden sm:table-cell">
                     {user.created_at.split(" ")[0]}
                   </td>
 
@@ -293,8 +313,8 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
             </button>
 
             {(() => {
-              const startPage = Math.max(1, currentPage - 2);
-              const endPage = Math.min(totalPages, currentPage + 2);
+              const startPage = Math.max(1, currentPage - 1);
+              const endPage = Math.min(totalPages, currentPage + 1);
               const buttons = [];
               
               if (startPage > 1) {
@@ -302,7 +322,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                   <button
                     key={1}
                     onClick={() => setCurrentPage(1)}
-                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold"
+                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold active:scale-[0.96] transition-transform"
                   >
                     1
                   </button>
@@ -317,9 +337,9 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                   <button
                     key={i}
                     onClick={() => setCurrentPage(i)}
-                    className={`px-3 py-1 rounded-xl border font-bold transition-all cursor-pointer active:scale-95 ${
+                    className={`px-3 py-1 rounded-xl border font-bold transition-all cursor-pointer active:scale-[0.96] ${
                       currentPage === i
-                        ? "bg-sky-500 border-sky-400/20 text-white shadow-md shadow-sky-500/20"
+                        ? "bg-[#FF7F11] border-[#FF7F11]/25 text-white shadow-md shadow-[#FF7F11]/20"
                         : "border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
                     }`}
                   >
@@ -336,7 +356,7 @@ export default function UsersTable({ users, onSelectUser, onToggleStatus, onDele
                   <button
                     key={totalPages}
                     onClick={() => setCurrentPage(totalPages)}
-                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold"
+                    className="px-3 py-1 rounded-xl border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 cursor-pointer font-bold active:scale-[0.96] transition-transform"
                   >
                     {totalPages}
                   </button>

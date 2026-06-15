@@ -279,7 +279,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white/[0.03] p-6 rounded-3xl ring-1 ring-white/10 backdrop-blur" id="csv-section">
       <div>
         <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2 font-display">
-          <Upload className="w-4 h-4 text-sky-400" />
+          <Upload className="w-4 h-4 text-[#FF7F11]" />
           Синхронизация пополнений (CSV)
         </h3>
         <p className="text-xs text-white/50 mb-4 font-normal">
@@ -294,8 +294,8 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
           onClick={triggerInput}
           className={`border-2 border-dashed rounded-2xl p-5 text-center cursor-pointer transition-all ${
             dragActive 
-              ? "border-sky-500 bg-sky-500/10 text-white" 
-              : "border-white/10 hover:border-sky-500/30 hover:bg-white/5"
+              ? "border-[#FF7F11] bg-[#FF7F11]/10 text-white" 
+              : "border-white/10 hover:border-[#FF7F11]/30 hover:bg-white/5"
           }`}
         >
           <input 
@@ -327,7 +327,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
       <div className="flex flex-col justify-between border-t md:border-t-0 md:border-l border-white/10 pt-5 md:pt-0 md:pl-6">
         <div>
           <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2 font-display">
-            <Download className="w-4 h-4 text-emerald-400" />
+            <Download className="w-4 h-4 text-[#FF7F11]" />
             Экспорт полной базы
           </h3>
           <p className="text-xs text-white/50 mb-4 leading-relaxed font-normal">
@@ -335,7 +335,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
           </p>
           <div className="bg-black/30 border border-white/5 p-4 rounded-2xl mb-4">
             <h4 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1.5 font-mono">Шаблон структуры CSV:</h4>
-            <pre className="text-[10px] text-sky-200/80 font-mono overflow-x-auto p-1 leading-normal">
+            <pre className="text-[10px] text-orange-200/85 font-mono overflow-x-auto p-1 leading-normal">
               user_id,username,first_name,tags{"\n"}
               49204024,tony_active,Антон,"money_and_succes"
             </pre>
@@ -344,7 +344,7 @@ export default function ImportExport({ onImportSuccess, users }: ImportExportPro
 
         <button 
           onClick={exportToCSV}
-          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide shadow-md cursor-pointer active:scale-[0.99] border border-emerald-500/20"
+          className="w-full bg-gradient-to-r from-[#FF7F11] to-amber-500 hover:from-[#E06A0B] hover:to-amber-600 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide shadow-md shadow-orange-500/10 cursor-pointer active:scale-[0.98] border border-[#FF7F11]/20"
         >
           <Download className="w-4 h-4" />
           Скачать базу ({users.length} лидов)

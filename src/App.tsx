@@ -10,7 +10,6 @@ import {
   Volume2, 
   Sparkles,
   Award,
-  Compass,
   Users,
   ShieldCheck,
   UserMinus,
@@ -141,7 +140,6 @@ export default function App() {
     if (useRealApi && isRealConnected) {
       try {
         setIsLoading(true);
-        // Отправляем все контакты на сервер, чтобы бэкенд мог вставить новые и ОБНОВИТЬ старые (никнеймы, имена, теги)
         const res = await importUsersReal(importedUsers);
         alert(res.message || "Импорт успешно завершен!");
         await loadBotData(); 
@@ -151,7 +149,6 @@ export default function App() {
         setIsLoading(false);
       }
     } else {
-      // Локальный / демо режим
       const updatedUsersList = [...users];
       let addedCount = 0;
       let updatedCount = 0;
@@ -159,7 +156,6 @@ export default function App() {
       for (const imp of importedUsers) {
         const existingIdx = updatedUsersList.findIndex(u => u.user_id === imp.user_id);
         if (existingIdx !== -1) {
-          // Обновляем существующего
           const existing = updatedUsersList[existingIdx];
           const mergedTags = Array.from(new Set([...existing.tags, ...imp.tags]));
           updatedUsersList[existingIdx] = {
@@ -170,7 +166,6 @@ export default function App() {
           };
           updatedCount++;
         } else {
-          // Добавляем нового
           updatedUsersList.unshift(imp);
           addedCount++;
         }
@@ -251,7 +246,6 @@ export default function App() {
         setIsLoading(false);
       }
     } else {
-      // Локальный/демо режим
       const activeUsers = users.filter(u => u.is_active);
       setUsers(activeUsers);
       saveUsersToStorage(activeUsers);
@@ -293,7 +287,6 @@ export default function App() {
 
   const dashboardStats = calculateStats(users, startDate, endDate);
 
-  // Filter users by date to match the stats filters
   const getFilteredUsers = () => {
     let filtered = [...users];
     if (startDate) {
@@ -315,37 +308,37 @@ export default function App() {
       id: "money",
       label: "Медитация Деньги и успех",
       count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_money_meditation" || t === "money_and_succes")).length,
-      gradient: "from-emerald-400 to-teal-500"
+      gradient: "from-[#FF7F11] to-amber-500"
     },
     {
       id: "energy",
       label: "Гайд Почему нет энергии",
       count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_energy" || t === "energy")).length,
-      gradient: "from-pink-400 to-fuchsia-500"
+      gradient: "from-[#FF7F11] via-amber-500 to-yellow-500"
     },
     {
       id: "step",
       label: "Гайд Магия маленьких шагов",
       count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_little_step" || t === "little_step")).length,
-      gradient: "from-amber-400 to-orange-500"
+      gradient: "from-amber-400 to-[#FF7F11]"
     },
     {
       id: "ideal_day",
       label: "Медитация Идеальный день",
       count: filteredUsersForStats.filter(u => u.tags.some(t => t === "chain_ideal_day" || t === "ideal_day")).length,
-      gradient: "from-indigo-400 to-purple-500"
+      gradient: "from-orange-400 to-[#FF7F11]"
     }
   ].sort((a, b) => b.count - a.count);
 
   if (!isLoggedIn) {
     return (
-      <div className="min-h-screen bg-[#030014] text-white flex flex-col justify-between relative overflow-hidden">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none" />
+      <div className="min-h-screen bg-[#07080b] text-white flex flex-col justify-between relative overflow-hidden editorial-grid">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full bg-[#FF7F11]/5 blur-3xl pointer-events-none" />
         
         <div className="flex-1 flex items-center justify-center p-4">
           <LoginScreen onLoginSuccess={handleLoginSuccess} />
         </div>
-        <footer className="py-6 text-center text-xs text-white/40 border-t border-white/5 bg-black/40 backdrop-blur">
+        <footer className="py-6 text-center text-xs text-white/40 border-t border-white/[0.06] bg-black/40 backdrop-blur">
           Панель управления • Money Migel © 2026. Все права защищены.
         </footer>
       </div>
@@ -353,81 +346,144 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#030014] text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[600px] bg-gradient-to-b from-indigo-500/10 via-sky-500/5 to-transparent blur-3xl pointer-events-none -z-10" />
-      <div className="absolute right-0 bottom-0 w-80 h-80 rounded-full bg-purple-500/5 blur-3xl pointer-events-none -z-10" />
+    <div className="min-h-screen bg-[#07080b] text-white flex flex-col justify-between relative overflow-x-hidden selection:bg-[#FF7F11] selection:text-white editorial-grid">
+      {/* Background Lights and Geometrics */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-[#FCE6D5]/10 via-[#F3E8EE]/5 to-transparent blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full border border-white/[0.02] pointer-events-none -z-10" />
+      <div className="absolute right-[-100px] bottom-[-100px] w-96 h-96 rounded-full bg-[#FF7F11]/5 blur-3xl pointer-events-none -z-10" />
+      <div className="absolute left-[-100px] bottom-[20%] w-96 h-96 rounded-full bg-[#FF7F11]/5 blur-3xl pointer-events-none -z-10" />
 
-      <header className="bg-black/40 backdrop-blur-md border-b border-white/10 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      <header className="bg-black/25 backdrop-blur-md border-b border-white/[0.06] sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-0 sm:h-18 flex items-center justify-between gap-2">
           
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-r from-indigo-500 to-sky-500 p-2.5 rounded-xl text-white shadow-lg flex items-center justify-center">
-              <Bot className="w-5 h-5" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="bg-[#FF7F11]/10 border border-[#FF7F11]/20 p-2 sm:p-2.5 rounded-xl text-[#FF7F11] flex items-center justify-center shrink-0">
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h1 className="text-md sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5 font-display">
+              <h1 className="text-sm sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5 font-display uppercase">
                 Money Migel 
-                <span className="text-[10px] font-bold text-sky-305 bg-sky-500/15 px-1.5 py-0.5 rounded border border-sky-400/20 select-none font-mono">BOT.CORE</span>
+                <span className="text-[8px] sm:text-[9px] font-bold text-[#FF7F11] bg-[#FF7F11]/10 px-1.5 py-0.5 rounded border border-[#FF7F11]/20 select-none font-mono">BOT.CORE</span>
               </h1>
-              <span className="text-[11px] text-white/50 font-normal block leading-none mt-0.5">
+              <span className="text-[9px] sm:text-[10px] text-white/40 font-normal block mt-0.5">
                 Админ-панель воронки лид-магнитов
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               onClick={() => setShowMailingModal(true)}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md active:scale-95 cursor-pointer border border-white/10"
+              className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white px-2.5 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-bold transition-all flex items-center gap-1 sm:gap-1.5 shadow-lg shadow-orange-500/10 active:scale-[0.96] cursor-pointer"
             >
-              <Volume2 className="w-3.5 h-3.5" />
-              <span>Запустить рассылку</span>
+              <Volume2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden xs:inline">Запустить рассылку</span>
+              <span className="xs:hidden">Рассылка</span>
             </button>
 
             <button 
               onClick={handleLogout}
-              className="text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all border border-white/10 bg-white/5"
+              className="text-white/60 hover:text-white p-2 rounded-xl hover:bg-white/5 transition-all border border-white/[0.08] bg-white/[0.02] active:scale-[0.96] cursor-pointer flex items-center justify-center"
               title="Выйти из системы"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
 
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full space-y-6 sm:space-y-8">
         
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
-          className="text-center py-6"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-sky-300 animate-pulse" />
-            <span className="text-xs text-sky-200/90 font-medium tracking-wide">Система управления лид-магнитами</span>
+        {/* Hero split layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center py-4 sm:py-10">
+          
+          {/* Left Text Column */}
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left animate-stagger-1">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.02] px-3.5 py-1.5 shadow-inner backdrop-blur">
+              <Sparkles className="h-3.5 w-3.5 text-[#FF7F11] animate-pulse" />
+              <span className="text-[10px] text-white/60 font-semibold uppercase tracking-wider font-mono">Система управления лид-магнитами</span>
+            </div>
+            
+            <h2 className="text-3xl sm:text-5xl lg:text-6xl font-light tracking-tight text-white font-display uppercase leading-none select-none">
+              Аналитика & <span className="text-[#FF7F11] font-bold">Контроль Воронок</span>
+            </h2>
+            
+            <span className="text-[10px] text-white/40 block mt-1 sm:mt-2 font-mono uppercase tracking-[0.25em]">
+              [ MONEY MIGEL • DATABASE CONTROL • 2026 ]
+            </span>
+            
+            <p className="max-w-xl text-xs sm:text-sm text-white/50 font-normal leading-relaxed">
+              Интегрированная база данных потенциальных клиентов, пришедших с мини-лендингов в Телеграм-бот. Управляйте рассылками, отслеживайте переходы и анализируйте конверсии в реальном времени.
+            </p>
+            
+            <div className="flex flex-wrap gap-3 pt-1 sm:pt-2">
+              <a 
+                href="#users-table-section"
+                className="bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.08] text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-[0.96] flex items-center gap-1.5"
+              >
+                <span>Открыть базу лидов</span>
+                <span className="text-white/40">↓</span>
+              </a>
+            </div>
           </div>
-          <h2 className="mt-4 text-3xl sm:text-5xl font-bold tracking-tight text-white font-display">
-            Аналитика & Контроль Воронок
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-xs sm:text-sm text-white/60 font-normal">
-            Интегрированная база данных потенциальных клиентов, пришедших <br />с мини-лендингов в Телеграм-бот
-          </p>
-        </motion.div>
 
+          {/* Right Frame Column (Mockup curvy render and overlay card) */}
+          <div className="lg:col-span-5 relative group min-h-[220px] sm:min-h-[300px] w-full flex items-center justify-center animate-stagger-2">
+            <div className="w-full h-56 sm:h-80 rounded-[32px] overflow-hidden border border-white/[0.08] relative backdrop-blur-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+              
+              {/* Background generated 3D image */}
+              <img 
+                src="/modern_sunset_funnel_graphic.png" 
+                className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700 select-none" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#07080b]/70 via-[#07080b]/10 to-transparent" />
+              
+              {/* Overlay Card - U-Verge Glass style */}
+              <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 u-glass rounded-2xl p-3.5 sm:p-4.5 space-y-2">
+                <span className="text-[9px] font-bold text-[#FF7F11] uppercase tracking-widest block font-mono">
+                  [ БАЗА ДАННЫХ — АКТИВНА ]
+                </span>
+                <p className="text-[10px] text-white/70 font-normal leading-normal">
+                  Аналитический хаб подключен к SQLite базе данных. Все вебхуки активны и верифицируют лиды.
+                </p>
+                <div className="flex gap-4 pt-1 font-mono">
+                  <div>
+                    <span className="text-[8px] text-white/40 uppercase block">[ ВСЕГО ЛИДОВ ]</span>
+                    <span className="text-xs font-bold text-white tabular-nums">{users.length}</span>
+                  </div>
+                  <div>
+                    <span className="text-[8px] text-white/40 uppercase block">[ АКТИВНЫЕ ]</span>
+                    <span className="text-xs font-bold text-[#FF7F11] tabular-nums">{dashboardStats.active_users}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Rotating circle badge */}
+            <div className="absolute -top-6 -right-6 hidden sm:flex w-20 h-20 rounded-full border border-white/[0.08] bg-black/50 backdrop-blur flex items-center justify-center text-center select-none shadow-lg animate-[spin_20s_linear_infinite]">
+              <span className="absolute text-[6px] font-bold text-white/35 uppercase tracking-[0.12em] font-mono leading-none">
+                CORE • STATS • DATA •
+              </span>
+              <span className="text-[#FF7F11] font-bold text-md">+</span>
+            </div>
+          </div>
+          
+        </div>
+
+        {/* Server status alert and config panel */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
-          className="bg-white/[0.03] ring-1 ring-white/10 rounded-2xl p-4 sm:p-5 backdrop-blur-md overflow-hidden relative"
+          className="u-glass rounded-3xl p-4 sm:p-5 relative overflow-hidden"
         >
-          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-indigo-500/5 blur-2xl pointer-events-none"></div>
+          <div className="absolute top-0 right-0 h-32 w-32 rounded-full bg-[#FF7F11]/5 blur-2xl pointer-events-none"></div>
           
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             
             <div className="flex items-start sm:items-center gap-3">
-              <div className={`p-3 rounded-xl flex items-center justify-center shrink-0 ${
+              <div className={`p-2.5 rounded-xl flex items-center justify-center shrink-0 ${
                 !useRealApi 
                   ? "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20"
                   : isRealConnected === true
@@ -437,20 +493,20 @@ export default function App() {
                   : "bg-white/10 text-white/50 ring-1 ring-white/10"
               }`}>
                 {isLoading ? (
-                  <RefreshCw className="w-5 h-5 animate-spin" />
+                  <RefreshCw className="w-4.5 h-4.5 animate-spin" />
                 ) : !useRealApi ? (
-                  <Database className="w-5 h-5" />
+                  <Database className="w-4.5 h-4.5" />
                 ) : isRealConnected === true ? (
-                  <Wifi className="w-5 h-5" />
+                  <Wifi className="w-4.5 h-4.5" />
                 ) : (
-                  <WifiOff className="w-5 h-5" />
+                  <WifiOff className="w-4.5 h-4.5" />
                 )}
               </div>
               
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">РЕЖИМ РАБОТЫ ПАНЕЛИ:</span>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                  <span className="text-[9px] font-bold text-white/45 uppercase tracking-widest font-mono">РЕЖИМ РАБОТЫ ПАНЕЛИ:</span>
+                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
                     !useRealApi 
                       ? "bg-amber-500/15 border-amber-400/20 text-amber-300" 
                       : isRealConnected === true 
@@ -461,7 +517,7 @@ export default function App() {
                   </span>
                 </div>
                 
-                <h3 className="text-white text-sm font-semibold flex items-center gap-1.5 flex-wrap">
+                <h3 className="text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 flex-wrap">
                   {!useRealApi ? (
                     <span>Используется локальное демо-хранилище (Mock режим)</span>
                   ) : isRealConnected === true ? (
@@ -477,47 +533,49 @@ export default function App() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:self-center shrink-0">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:self-center shrink-0 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => setUseRealApi(!useRealApi)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer active:scale-95 flex items-center gap-1.5 ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer active:scale-[0.96] flex items-center justify-center gap-1.5 ${
                   useRealApi 
                     ? "bg-white/5 border-white/10 hover:bg-white/10 text-white/90" 
-                    : "bg-indigo-500 text-white border-indigo-400/30 hover:bg-indigo-600 shadow-md"
+                    : "bg-[#FF7F11] text-white border-orange-500/20 hover:bg-[#E06A0B] shadow-md shadow-orange-500/10"
                 }`}
               >
                 {useRealApi ? "Перейти на Демо-режим" : "Включить Живую VPS"}
               </button>
 
-              {useRealApi && (
-                <button
-                  onClick={loadBotData}
-                  disabled={isLoading}
-                  title="Обновить связь с сервером"
-                  className="p-2 border border-white/10 hover:bg-white/10 bg-white/5 text-white/80 rounded-xl transition-all disabled:opacity-50 cursor-pointer"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
-                </button>
-              )}
+              <div className="flex gap-2">
+                {useRealApi && (
+                  <button
+                    onClick={loadBotData}
+                    disabled={isLoading}
+                    title="Обновить связь с сервером"
+                    className="p-2 border border-white/10 hover:bg-white/10 bg-white/5 text-white/80 rounded-xl transition-all disabled:opacity-50 cursor-pointer active:scale-[0.96] flex items-center justify-center flex-1 sm:flex-none"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? "animate-spin" : ""}`} />
+                  </button>
+                )}
 
-              <button
-                onClick={() => setShowConfigPanel(!showConfigPanel)}
-                className={`p-2 border rounded-xl transition-all cursor-pointer duration-150 flex items-center justify-center gap-1.5 text-xs font-bold ${
-                  showConfigPanel 
-                    ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300" 
-                    : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
-                }`}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span>Настройки домена</span>
-              </button>
+                <button
+                  onClick={() => setShowConfigPanel(!showConfigPanel)}
+                  className={`p-2 border rounded-xl transition-all cursor-pointer duration-150 flex items-center justify-center gap-1.5 text-xs font-bold active:scale-[0.96] flex-1 sm:flex-none ${
+                    showConfigPanel 
+                      ? "bg-[#FF7F11]/20 border-[#FF7F11]/30 text-orange-300" 
+                      : "bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
+                  }`}
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Настройки домена</span>
+                </button>
+              </div>
 
               <button
                 type="button"
                 onClick={handleCleanupBlocked}
                 disabled={isLoading}
-                className="px-3 py-1.5 rounded-xl text-xs font-bold border border-rose-500/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold border border-rose-500/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20 transition-all cursor-pointer active:scale-[0.96] disabled:opacity-50 flex items-center justify-center gap-1.5"
                 title="Удалить всех неактивных пользователей из базы"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -545,7 +603,7 @@ export default function App() {
                     <div className="pt-1.5 text-[11px] text-white/60 space-y-1 list-decimal pl-3 font-normal">
                       <div>1. Убедитесь, что ваш Python FastAPI-сервер запускается с файлом <b className="text-white">admin_api.py</b> и корректно активен на VPS.</div>
                       <div>2. В коде вашего FastAPI (<b className="text-sky-300 font-mono">admin_api.py</b>) обязательно должна быть включена поддержка CORS роутинга (CORSMiddleware) для вашего Netlify домена.</div>
-                      <div>3. Домен сервера должен поддерживать <b className="text-emerald-405 font-semibold">HTTPS</b>. Если ваш сервер VPS доступен по обычному HTTP (например, <code className="font-mono text-[10px] bg-black/30 px-1">http://api.antonovdv.ru</code>), браузер может заблокировать запрос из соображений безопасности (Mixed Content), так как Netlify работает по HTTPS.</div>
+                      <div>3. Домен сервера должен поддерживать <b className="text-emerald-405 font-semibold">HTTPS</b>. Если ваш server VPS доступен по обычному HTTP (например, <code className="font-mono text-[10px] bg-black/30 px-1">http://api.antonovdv.ru</code>), браузер может заблокировать запрос из соображений безопасности (Mixed Content), так как Netlify работает по HTTPS.</div>
                     </div>
                   </div>
                 </div>
@@ -565,7 +623,7 @@ export default function App() {
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
                   
                   <div className="sm:col-span-3 space-y-1.5">
-                    <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
+                    <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest font-mono">
                       Адрес вашего Python FastAPI сервера (VPS):
                     </label>
                     <div className="relative">
@@ -575,7 +633,7 @@ export default function App() {
                         placeholder="https://api.antonovdv.ru"
                         value={apiUrl}
                         onChange={(e) => setApiUrl(e.target.value)}
-                        className="w-full text-xs font-mono bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/40 text-white placeholder-white/20"
+                        className="w-full text-xs font-mono bg-black/40 border border-white/10 rounded-xl px-3.5 py-2.5 outline-none focus:ring-1 focus:ring-[#FF7F11]/40 text-white placeholder-white/20"
                       />
                     </div>
                     <span className="text-[10px] text-white/40 block">
@@ -587,7 +645,7 @@ export default function App() {
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                      className="flex-1 bg-[#FF7F11] hover:bg-[#E06A0B] text-white font-bold py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-[0.96] disabled:opacity-50"
                     >
                       {isLoading ? "Подключение..." : "Применить"}
                     </button>
@@ -595,7 +653,7 @@ export default function App() {
                     <button
                       type="button"
                       onClick={handleResetToDefaultUrl}
-                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-bold px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer"
+                      className="bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 font-bold px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer active:scale-[0.96]"
                       title="Сбросить на значение по умолчанию"
                     >
                       Сброс
@@ -621,22 +679,27 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
-          <div className="flex flex-col gap-4 lg:col-span-1">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-4 lg:col-span-1">
             
             <motion.div 
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.05 }}
-              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.15)" }}
-              className="bg-white/[0.02] ring-1 ring-white/10 p-5 rounded-3xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-sky-500 backdrop-blur transition-all duration-200 cursor-pointer h-full min-h-[105px]"
+              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(255,127,17,0.2)" }}
+              className="u-glass p-5 rounded-2xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-[#FF7F11] backdrop-blur transition-all duration-250 cursor-pointer min-h-[105px] group"
             >
               <div>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block font-mono">Всего в базе</span>
-                <span className="text-3xl font-extrabold text-white mt-1.5 block font-display">{dashboardStats.total_users}</span>
+                <span className="text-[9px] font-bold text-white/45 uppercase tracking-widest block font-mono">Всего в базе</span>
+                <span className="text-3xl font-extrabold text-white mt-1.5 block font-display tabular-nums">{dashboardStats.total_users}</span>
                 <span className="text-[10px] text-white/40 mt-1 block font-normal">Записей в SQLite БД</span>
               </div>
-              <div className="bg-sky-500/10 p-2.5 rounded-2xl ring-1 ring-sky-500/20 text-sky-400">
+              <div className="bg-[#FF7F11]/10 p-2.5 rounded-xl border border-[#FF7F11]/20 text-[#FF7F11] relative z-10">
                 <Users className="w-5 h-5" />
+              </div>
+              
+              {/* Background 3D Database Graphic representation */}
+              <div className="absolute right-[-14px] bottom-[-14px] w-20 h-20 opacity-15 group-hover:opacity-30 group-hover:scale-105 transition-all duration-300 pointer-events-none">
+                <img src="/sunset_database_graphic.png" className="w-full h-full object-contain select-none" />
               </div>
             </motion.div>
 
@@ -644,15 +707,15 @@ export default function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1 }}
-              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.15)" }}
-              className="bg-white/[0.02] ring-1 ring-white/10 p-5 rounded-3xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-emerald-500 backdrop-blur transition-all duration-200 cursor-pointer h-full min-h-[105px]"
+              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(52,211,153,0.2)" }}
+              className="u-glass p-5 rounded-2xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-emerald-500 backdrop-blur transition-all duration-250 cursor-pointer min-h-[105px]"
             >
               <div>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block font-mono">Активные</span>
-                <span className="text-3xl font-extrabold text-emerald-400 mt-1.5 block font-display">{dashboardStats.active_users}</span>
+                <span className="text-[9px] font-bold text-white/45 uppercase tracking-widest block font-mono">Активные</span>
+                <span className="text-3xl font-extrabold text-emerald-400 mt-1.5 block font-display tabular-nums">{dashboardStats.active_users}</span>
                 <span className="text-[10px] text-emerald-400/70 mt-1 block font-medium">Получают рассылки</span>
               </div>
-              <div className="bg-emerald-500/10 p-2.5 rounded-2xl ring-1 ring-emerald-500/20 text-emerald-400">
+              <div className="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/20 text-emerald-400">
                 <ShieldCheck className="w-5 h-5" />
               </div>
             </motion.div>
@@ -661,15 +724,15 @@ export default function App() {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.15 }}
-              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.05)", borderColor: "rgba(255,255,255,0.15)" }}
-              className="bg-white/[0.02] ring-1 ring-white/10 p-5 rounded-3xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-rose-500 backdrop-blur transition-all duration-200 cursor-pointer h-full min-h-[105px]"
+              whileHover={{ y: -4, backgroundColor: "rgba(255,255,255,0.04)", borderColor: "rgba(244,63,94,0.2)" }}
+              className="u-glass p-5 rounded-2xl relative overflow-hidden flex items-center justify-between border-l-4 border-l-rose-500 backdrop-blur transition-all duration-250 cursor-pointer min-h-[105px]"
             >
               <div>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest block font-mono">Отписки / Блоки</span>
-                <span className="text-3xl font-extrabold text-rose-400 mt-1.5 block font-display">{dashboardStats.unsubscribed}</span>
+                <span className="text-[9px] font-bold text-white/45 uppercase tracking-widest block font-mono">Отписки / Блоки</span>
+                <span className="text-3xl font-extrabold text-rose-400 mt-1.5 block font-display tabular-nums">{dashboardStats.unsubscribed}</span>
                 <span className="text-[10px] text-rose-400/70 mt-1 block font-medium">Залочили бота</span>
               </div>
-              <div className="bg-rose-500/10 p-2.5 rounded-2xl ring-1 ring-rose-500/20 text-rose-400">
+              <div className="bg-rose-500/10 p-2.5 rounded-xl border border-rose-500/20 text-rose-400">
                 <UserMinus className="w-5 h-5" />
               </div>
             </motion.div>
@@ -680,14 +743,14 @@ export default function App() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="group relative overflow-hidden rounded-3xl bg-white/[0.03] hover:bg-white/[0.04] ring-1 ring-white/10 p-6 backdrop-blur flex flex-col justify-between transition-colors duration-200 lg:col-span-2 h-full"
+            className="group relative overflow-hidden rounded-2xl bg-white/[0.015] hover:bg-white/[0.025] border border-white/[0.06] p-5 sm:p-6 backdrop-blur flex flex-col justify-between transition-all duration-300 lg:col-span-2 h-full"
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent pointer-events-none"></div>
-            <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl text-indigo-500"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FF7F11]/5 via-transparent to-transparent pointer-events-none"></div>
+            <div className="absolute -right-24 -top-24 h-48 w-48 rounded-full bg-[#FF7F11]/5 blur-3xl text-orange-500"></div>
 
             <div className="relative z-10">
               <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 mb-1.5 font-display">
-                <Award className="w-5 h-5 text-sky-300" />
+                <Award className="w-5 h-5 text-orange-300" />
                 Распределение лидов по тегам воронок
               </h3>
               <p className="text-xs text-white/50 mb-6 font-normal">
@@ -700,20 +763,20 @@ export default function App() {
                 <div className="text-center py-8 text-xs text-white/40 italic">Основные теги не найдены в базе данных</div>
               ) : (
                 groupedTags.map(t => {
-                  const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 105);
+                  const percentage = Math.round((t.count / (dashboardStats.total_users || 1)) * 100);
                   const safePercentage = Math.min(percentage, 100);
 
                   return (
                     <div key={t.id} className="space-y-1.5">
                       <div className="flex justify-between items-center text-xs">
-                        <span className="font-semibold text-white/80">{t.label}</span>
+                        <span className="font-semibold text-white/70 text-[11px]">{t.label}</span>
                         <div className="flex items-center gap-1.5 font-bold">
-                          <span className="text-white/40 font-mono">({t.count} чел.)</span>
-                          <span className="text-sky-300 font-bold font-mono">{safePercentage}%</span>
+                          <span className="text-white/35 font-mono text-[10px]">({t.count} чел.)</span>
+                          <span className="text-orange-300 font-bold font-mono tabular-nums text-[11px]">{safePercentage}%</span>
                         </div>
                       </div>
                       
-                      <div className="w-full bg-white/5 rounded-full h-2 ring-1 ring-white/10 overflow-hidden">
+                      <div className="w-full bg-white/5 rounded-full h-1.5 border border-white/[0.05] overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${safePercentage}%` }}
@@ -727,8 +790,8 @@ export default function App() {
               )}
             </div>
 
-            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4.5 text-xs text-white/50 mt-4 leading-relaxed relative z-10 w-full shrink-0">
-              💡 <b>Как это работает:</b> При заполнении форм на лендингах, данные лидов по вебхуку летят в СУБД бота SQLite. Когда клиент нажимает кнопку запуска в Telegram, бот автоматически навешивает соответствующие теги подписок, позволяя вам сегментировать рассылки.
+            <div className="bg-white/[0.01] border border-white/[0.04] rounded-xl p-4 text-xs text-white/45 mt-4 leading-relaxed relative z-10 w-full shrink-0">
+              💡 <b>Как это работает:</b> При заполнении форм на лендингах, данные лидов летят в СУБД SQLite. Бот автоматически вешает теги подписок, позволяя вам сегментировать рассылки.
             </div>
           </motion.div>
 
@@ -748,11 +811,11 @@ export default function App() {
 
       </main>
 
-      <footer className="bg-black/40 backdrop-blur-md border-t border-white/10 py-6 text-center text-xs text-white/40 mt-12 shrink-0">
+      <footer className="bg-[#07080b]/90 backdrop-blur-md border-t border-white/[0.06] py-6 text-center text-xs text-white/40 mt-12 shrink-0 relative z-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <span>Панель администрирования бота Money Migel © 2026.</span>
-          <span className="flex items-center gap-1 font-mono text-[10px] text-white/30">
-            <Sparkles className="w-3 h-3 text-indigo-400" />
+          <span className="flex items-center gap-1 font-mono text-[9px] text-white/30">
+            <Sparkles className="w-3 h-3 text-[#FF7F11]" />
             Antonov Dmitriy Design
           </span>
         </div>

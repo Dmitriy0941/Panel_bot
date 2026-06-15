@@ -138,27 +138,27 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-[#0b0825] border border-white/10 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative">
-        <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
+      <div className="bg-[#0b0c10]/95 backdrop-blur-2xl border border-white/[0.08] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative">
+        <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-[#FF7F11]/5 blur-3xl pointer-events-none"></div>
 
         {/* Modal Header */}
         <div className="bg-white/[0.02] border-b border-white/10 p-5 flex justify-between items-center shrink-0 relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="bg-indigo-500/10 p-2.5 rounded-xl ring-1 ring-indigo-400/20 text-indigo-400">
+            <div className="bg-[#FF7F11]/10 p-2.5 rounded-xl ring-1 ring-[#FF7F11]/20 text-[#FF7F11]">
               <User className="w-5 h-5" />
             </div>
             <div>
               <h3 className="font-bold text-white text-md">
                 {user.first_name || "Лид без имени"}
               </h3>
-              <p className="text-[11px] text-sky-300 font-semibold font-mono">
+              <p className="text-[11px] text-orange-300 font-semibold font-mono">
                 {user.username ? `@${user.username}` : "Никнейм: скрыт"}
               </p>
             </div>
           </div>
           <button 
             onClick={onClose}
-            className="text-white/45 hover:text-white p-1.5 hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+            className="text-white/45 hover:text-white p-1.5 hover:bg-white/5 rounded-xl transition-all cursor-pointer active:scale-[0.96] transition-transform"
           >
             <X className="w-5 h-5" />
           </button>
@@ -168,25 +168,25 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
         <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar relative z-10">
           
           {/* User Information Stats */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                <Calendar className="w-3.5 h-3.5 text-indigo-400" />
+                <Calendar className="w-3.5 h-3.5 text-[#FF7F11]" />
                 Дата входа
               </span>
               <span className="text-xs font-semibold text-white/95 break-all font-mono">{user.created_at}</span>
             </div>
             <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                <Landmark className="w-3.5 h-3.5 text-sky-400" />
+                <Landmark className="w-3.5 h-3.5 text-[#FF7F11]" />
                 Telegram ID
               </span>
-              <span className="text-xs font-bold text-sky-300 break-all font-mono">{user.user_id}</span>
+              <span className="text-xs font-bold text-[#FF7F11] break-all font-mono">{user.user_id}</span>
             </div>
             
-            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-2">
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1 sm:col-span-2">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                <User className="w-3.5 h-3.5 text-indigo-405" />
+                <User className="w-3.5 h-3.5 text-[#FF7F11]" />
                 Никнейм в Telegram (Username)
               </span>
               <span className="text-xs font-bold font-mono block pt-0.5">
@@ -195,7 +195,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                     href={`https://t.me/${user.username}`} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="text-sky-400 hover:text-sky-300 hover:underline"
+                    className="text-[#FF7F11] hover:text-[#E06A0B] hover:underline"
                   >
                     @{user.username}
                   </a>
@@ -205,7 +205,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
               </span>
             </div>
             
-            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-2">
+            <div className="bg-white/[0.02] p-3.5 rounded-2xl border border-white/5 space-y-1 col-span-1 sm:col-span-2">
               <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest block font-mono">
                 Имя лида
               </span>
@@ -213,7 +213,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-indigo-500 font-medium"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 font-medium"
                 placeholder="Имя не указано"
               />
             </div>
@@ -226,7 +226,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-medium"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-white outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 font-mono font-medium"
                 placeholder="не указан"
               />
             </div>
@@ -239,7 +239,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 type="text"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-sky-300 outline-none focus:ring-1 focus:ring-indigo-500 font-mono font-medium"
+                className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-3 py-2 text-xs text-orange-200 outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 font-mono font-medium"
                 placeholder="не указан"
               />
             </div>
@@ -267,7 +267,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 }
               }}
               disabled={saveStatus === "saving"}
-              className="w-full bg-gradient-to-r from-indigo-500 to-sky-500 hover:from-indigo-600 hover:to-sky-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md active:scale-[0.99] cursor-pointer"
+              className="w-full bg-gradient-to-r from-[#FF7F11] to-amber-500 hover:from-[#E06A0B] hover:to-amber-600 text-white font-bold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/10 active:scale-[0.98] cursor-pointer border border-[#FF7F11]/20"
             >
               {saveStatus === "saving" ? "Сохранение..." : saveStatus === "saved" ? "✓ Успешно сохранено!" : "Сохранить изменения в профиле"}
             </button>
@@ -287,7 +287,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
             
             <button
               onClick={handleToggleActive}
-              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border cursor-pointer active:scale-[0.96] transition-transform ${
                 user.is_active 
                   ? "border-rose-500/20 bg-rose-500/10 text-rose-300 hover:bg-rose-500/20" 
                   : "border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20"
@@ -303,7 +303,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
               <label className="block text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
                 Воронки и теги пользователя
               </label>
-              <span className="text-xs text-sky-300 font-semibold">{user.tags.filter(t => t !== "received_lead").length} тегов</span>
+              <span className="text-xs text-orange-300 font-semibold">{user.tags.filter(t => t !== "received_lead").length} тегов</span>
             </div>
 
             <div className="flex flex-wrap gap-1.5 min-h-[40px] p-3 rounded-2xl border border-white/10 bg-white/[0.01]">
@@ -315,7 +315,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                   .map(tag => (
                     <span 
                       key={tag} 
-                      className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-xl font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-xl font-semibold bg-[#FF7F11]/10 text-orange-300 border border-[#FF7F11]/20"
                     >
                       {getTagLabel(tag)}
                       <button 
@@ -337,11 +337,11 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 placeholder="Впишите тег... (например: energy)"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-white placeholder-white/20"
+                className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 font-medium text-white placeholder-white/20"
               />
               <button 
                 type="submit"
-                className="bg-sky-500 hover:bg-sky-600 text-white rounded-xl px-3.5 py-2 text-xs font-bold transition-all flex items-center gap-1 select-none cursor-pointer active:scale-95"
+                className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white rounded-xl px-3.5 py-2 text-xs font-bold transition-all flex items-center gap-1 select-none cursor-pointer active:scale-95 shadow-md shadow-orange-500/10 border border-[#FF7F11]/20"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Добавить
@@ -352,7 +352,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
           {/* Test Telegram API Push Notification Message */}
           <div className="border-t border-white/10 pt-5 space-y-3">
             <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/40 uppercase tracking-widest font-mono">
-              <Bot className="w-4 h-4 text-indigo-400" />
+              <Bot className="w-4 h-4 text-[#FF7F11]" />
               Отправка тестового Push-сообщения
             </div>
             
@@ -370,7 +370,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                     onClick={() => { setMediaSource("url"); setMediaType(""); setMediaFile(""); setFileName(""); }}
                     className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
                       mediaSource === "url" 
-                        ? "bg-indigo-500 text-white shadow-sm" 
+                        ? "bg-[#FF7F11] text-white shadow-sm" 
                         : "text-white/40 hover:text-white/70 disabled:opacity-30"
                     }`}
                   >
@@ -382,7 +382,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                     onClick={() => { setMediaSource("device"); setMediaType(""); setMediaFile(""); setFileName(""); }}
                     className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
                       mediaSource === "device" 
-                        ? "bg-indigo-500 text-white shadow-sm" 
+                        ? "bg-[#FF7F11] text-white shadow-sm" 
                         : "text-white/40 hover:text-white/70 disabled:opacity-30"
                     }`}
                   >
@@ -407,7 +407,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                           onClick={() => setMediaType(item.id as any)}
                           className={`py-1 rounded-lg text-[8px] font-bold transition-all cursor-pointer ${
                             mediaType === item.id 
-                              ? "bg-indigo-500 text-white shadow-sm" 
+                              ? "bg-[#FF7F11] text-white shadow-sm" 
                               : "text-white/40 hover:text-white/70 hover:bg-white/5 disabled:opacity-30"
                           }`}
                         >
@@ -418,7 +418,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
 
                     {mediaType !== "" && user.is_active && (
                       <div className="space-y-1 animate-fade-in pt-1">
-                        <label className="block text-[8px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                        <label className="block text-[8px] font-bold text-orange-300 uppercase tracking-wider font-mono">
                           Telegram File ID или прямая URL ссылка:
                         </label>
                         <input
@@ -432,18 +432,18 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                             mediaType === "audio" ? "CQACAgIAAxkBAAID... или https://site.com/audio.mp3" :
                             "BAACAgIAAxkBAAIE... или https://site.com/video.mp4"
                           }
-                          className="w-full p-2 bg-white/[0.02] border border-white/10 rounded-xl text-[10px] outline-none focus:ring-1 focus:ring-indigo-500 text-white placeholder-white/20 font-mono"
+                          className="w-full p-2 bg-white/[0.02] border border-white/10 rounded-xl text-[10px] outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 text-white placeholder-white/20 font-mono"
                         />
                       </div>
                     )}
                   </>
                 ) : (
                   <div className="space-y-2 pt-1 animate-fade-in">
-                    <label className="block text-[8px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                    <label className="block text-[8px] font-bold text-orange-300 uppercase tracking-wider font-mono">
                       Выберите файл с вашего ноутбука или смартфона:
                     </label>
                     <div className="flex items-center gap-3">
-                      <label className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-all cursor-pointer select-none">
+                      <label className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white font-bold py-1.5 px-3 rounded-xl text-[10px] transition-all cursor-pointer select-none active:scale-95 shadow-md shadow-orange-500/10 border border-[#FF7F11]/20">
                         Выбрать файл
                         <input
                           type="file"
@@ -475,7 +475,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                 onChange={(e) => setMsgText(e.target.value)}
                 rows={2}
                 disabled={!user.is_active}
-                className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all font-medium text-white disabled:opacity-40 resize-none placeholder-white/20"
+                className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 transition-all font-medium text-white disabled:opacity-40 resize-none placeholder-white/20"
               />
               <div className="flex justify-between items-center">
                 {!user.is_active && (
@@ -491,7 +491,7 @@ export default function UserModal({ user, onClose, onUpdateUser, useRealApi = fa
                   <button
                     type="submit"
                     disabled={sending || !msgText.trim() || !user.is_active}
-                    className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1 cursor-pointer active:scale-95"
+                    className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-40 flex items-center gap-1 cursor-pointer active:scale-95 shadow-md shadow-orange-500/10 border border-[#FF7F11]/20"
                   >
                     <Send className="w-3 h-3" />
                     {sending ? "Посылаю..." : "Отправить"}

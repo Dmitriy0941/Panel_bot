@@ -188,13 +188,13 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
 
   return (
     <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-[#0b0825] border border-white/10 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative">
-        <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-purple-500/10 blur-3xl pointer-events-none"></div>
+      <div className="bg-[#0b0c10]/95 backdrop-blur-2xl border border-white/[0.08] rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh] relative">
+        <div className="absolute top-0 right-0 h-44 w-44 rounded-full bg-[#FF7F11]/5 blur-3xl pointer-events-none"></div>
 
         {/* Modal Header */}
         <div className="bg-white/[0.02] border-b border-white/10 p-5 flex justify-between items-center shrink-0 relative z-10">
           <div className="flex items-center gap-2.5">
-            <div className="bg-purple-500/15 p-2.5 rounded-xl ring-1 ring-purple-400/20 text-purple-300">
+            <div className="bg-[#FF7F11]/10 p-2.5 rounded-xl ring-1 ring-[#FF7F11]/20 text-[#FF7F11]">
               <Volume2 className="w-5 h-5" />
             </div>
             <div>
@@ -204,7 +204,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
           </div>
           <button 
             onClick={onClose}
-            className="text-white/45 hover:text-white p-1.5 hover:bg-white/5 rounded-xl transition-all cursor-pointer"
+            className="text-white/45 hover:text-white p-1.5 hover:bg-white/5 rounded-xl transition-all cursor-pointer active:scale-[0.96] transition-transform"
             disabled={sending}
           >
             <X className="w-5 h-5" />
@@ -227,7 +227,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
               </div>
               <button
                 onClick={onClose}
-                className="bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2.5 px-6 rounded-xl transition-all text-xs cursor-pointer shadow-md"
+                className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white font-semibold py-2.5 px-6 rounded-xl transition-all text-xs cursor-pointer shadow-md shadow-orange-500/10 border border-[#FF7F11]/20 active:scale-95"
               >
                 Закрыть окно рассылок
               </button>
@@ -235,7 +235,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
           ) : sending ? (
             <div className="text-center py-8 space-y-6">
               <div className="flex justify-center">
-                <Loader2 className="w-10 h-10 text-sky-400 animate-spin" />
+                <Loader2 className="w-10 h-10 text-[#FF7F11] animate-spin" />
               </div>
               <div className="space-y-2 max-w-sm mx-auto">
                 <h4 className="font-bold text-white text-sm font-display">Отправка сообщений в процессе...</h4>
@@ -244,11 +244,11 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                 </p>
                 <div className="w-full bg-white/5 rounded-full h-2 mt-4 ring-1 ring-white/10 overflow-hidden">
                   <div 
-                    className="bg-gradient-to-r from-sky-400 to-indigo-500 h-full rounded-full transition-all duration-150" 
+                    className="bg-gradient-to-r from-[#FF7F11] to-amber-500 h-full rounded-full transition-all duration-155" 
                     style={{ width: `${(progress.current / progress.total) * 100}%` }}
                   ></div>
                 </div>
-                <span className="text-xs font-bold text-sky-300 inline-block mt-2 font-mono">
+                <span className="text-xs font-bold text-orange-300 inline-block mt-2 font-mono">
                   Обработано {progress.current} из {progress.total} получателей ({Math.round((progress.current / progress.total) * 100)}%)
                 </span>
               </div>
@@ -266,9 +266,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   <button
                     type="button"
                     onClick={() => setTargetMode("all")}
-                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                       targetMode === "all" 
-                        ? "bg-indigo-500 text-white shadow-md" 
+                        ? "bg-[#FF7F11] text-white shadow-md shadow-orange-500/10" 
                         : "text-white/50 hover:text-white/80 hover:bg-white/5"
                     }`}
                   >
@@ -279,9 +279,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   <button
                     type="button"
                     onClick={() => setTargetMode("tags")}
-                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                       targetMode === "tags" 
-                        ? "bg-indigo-500 text-white shadow-md" 
+                        ? "bg-[#FF7F11] text-white shadow-md shadow-orange-500/10" 
                         : "text-white/50 hover:text-white/80 hover:bg-white/5"
                     }`}
                   >
@@ -292,9 +292,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   <button
                     type="button"
                     onClick={() => setTargetMode("users")}
-                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
+                    className={`py-2 px-3 rounded-xl text-[11px] font-bold flex flex-col items-center gap-1.5 transition-all cursor-pointer active:scale-95 ${
                       targetMode === "users" 
-                        ? "bg-indigo-500 text-white shadow-md" 
+                        ? "bg-[#FF7F11] text-white shadow-md shadow-orange-500/10" 
                         : "text-white/50 hover:text-white/80 hover:bg-white/5"
                     }`}
                   >
@@ -318,14 +318,14 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                           type="button"
                           key={tag.name}
                           onClick={() => handleTagToggle(tag.name)}
-                          className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer ${
+                          className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-xs font-semibold text-left transition-all cursor-pointer active:scale-95 ${
                             isChecked 
-                              ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-200" 
+                              ? "bg-[#FF7F11]/10 border-[#FF7F11]/30 text-orange-200" 
                               : "bg-white/[0.02] border-white/5 text-white/60 hover:bg-white/[0.04] hover:text-white/80"
                           }`}
                         >
                           {isChecked ? (
-                            <CheckSquare className="w-4 h-4 text-indigo-400 shrink-0" />
+                            <CheckSquare className="w-4 h-4 text-[#FF7F11] shrink-0" />
                           ) : (
                             <Square className="w-4 h-4 text-white/20 shrink-0" />
                           )}
@@ -351,7 +351,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                     value={targetUserIds}
                     onChange={(e) => setTargetUserIds(e.target.value)}
                     placeholder="84729103, 19284719, 47291038"
-                    className="w-full p-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/30 text-white placeholder-white/20 font-mono"
+                    className="w-full p-3 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 text-white placeholder-white/20 font-mono"
                   />
                   <span className="text-[10px] text-white/30 block leading-tight font-normal">
                     Введите числовые Telegram UID получателей через запятую.
@@ -369,9 +369,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   <button
                     type="button"
                     onClick={() => { setMediaSource("url"); setMediaType(""); setMediaFile(""); setFileName(""); }}
-                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer active:scale-95 ${
                       mediaSource === "url" 
-                        ? "bg-indigo-500 text-white shadow-sm" 
+                        ? "bg-[#FF7F11] text-white shadow-sm" 
                         : "text-white/40 hover:text-white/70"
                     }`}
                   >
@@ -380,9 +380,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   <button
                     type="button"
                     onClick={() => { setMediaSource("device"); setMediaType(""); setMediaFile(""); setFileName(""); }}
-                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                    className={`py-1 rounded-lg text-[9px] font-bold transition-all cursor-pointer active:scale-95 ${
                       mediaSource === "device" 
-                        ? "bg-indigo-500 text-white shadow-sm" 
+                        ? "bg-[#FF7F11] text-white shadow-sm" 
                         : "text-white/40 hover:text-white/70"
                     }`}
                   >
@@ -404,9 +404,9 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                           type="button"
                           key={item.id}
                           onClick={() => setMediaType(item.id as any)}
-                          className={`py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer ${
+                          className={`py-1.5 rounded-lg text-[9px] font-bold transition-all cursor-pointer active:scale-95 ${
                             mediaType === item.id 
-                              ? "bg-indigo-500 text-white shadow-sm" 
+                              ? "bg-[#FF7F11] text-white shadow-sm" 
                               : "text-white/40 hover:text-white/70 hover:bg-white/5"
                           }`}
                         >
@@ -417,7 +417,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
 
                     {mediaType !== "" && (
                       <div className="space-y-1.5 animate-fade-in pt-1">
-                        <label className="block text-[9px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                        <label className="block text-[9px] font-bold text-orange-300 uppercase tracking-wider font-mono">
                           Telegram File ID или прямая URL ссылка:
                         </label>
                         <input
@@ -431,7 +431,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                             mediaType === "audio" ? "CQACAgIAAxkBAAID... или https://site.com/audio.mp3" :
                             "BAACAgIAAxkBAAIE... или https://site.com/video.mp4"
                           }
-                          className="w-full p-2.5 bg-white/[0.02] border border-white/10 rounded-xl text-[11px] outline-none focus:ring-1 focus:ring-indigo-500 text-white placeholder-white/20 font-mono"
+                          className="w-full p-2.5 bg-white/[0.02] border border-white/10 rounded-xl text-[11px] outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 text-white placeholder-white/20 font-mono"
                         />
                         <span className="text-[9px] text-white/30 block leading-tight font-normal">
                           💡 <b>Совет:</b> Самый быстрый способ получить <code>file_id</code> — переслать медиафайл вашему боту в Telegram. Бот автоматически вернет готовый ID для вставки!
@@ -441,11 +441,11 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   </>
                 ) : (
                   <div className="space-y-2 pt-1 animate-fade-in">
-                    <label className="block text-[9px] font-bold text-indigo-300 uppercase tracking-wider font-mono">
+                    <label className="block text-[9px] font-bold text-orange-300 uppercase tracking-wider font-mono">
                       Выберите файл с вашего ноутбука или смартфона:
                     </label>
                     <div className="flex items-center gap-3">
-                      <label className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer select-none">
+                      <label className="bg-[#FF7F11] hover:bg-[#E06A0B] text-white font-bold py-2 px-4 rounded-xl text-xs transition-all cursor-pointer select-none active:scale-95 shadow-md shadow-orange-500/10 border border-[#FF7F11]/20">
                         Выбрать файл
                         <input
                           type="file"
@@ -482,7 +482,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Привет! Вы получили этот ценный разбор, потому что оставили заявку на мини-лендинге Tilda..."
-                  className="w-full p-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-sky-500/25 text-white placeholder-white/20 leading-relaxed"
+                  className="w-full p-3.5 bg-white/[0.03] border border-white/10 rounded-xl text-xs outline-none focus:ring-2 focus:ring-[#FF7F11]/25 focus:border-[#FF7F11]/50 text-white placeholder-white/20 leading-relaxed"
                 />
                 <div className="flex justify-between text-[10px] text-white/30 font-mono">
                   <span>Вы можете использовать теги: &lt;b&gt;, &lt;i&gt;, &lt;code&gt;, &lt;a href="..."&gt;</span>
@@ -491,10 +491,10 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
               </div>
 
               {/* API Integration Hint */}
-              <div className="bg-indigo-500/10 rounded-2xl p-4 border border-indigo-500/20 flex items-start gap-2.5 text-xs text-indigo-200/90 leading-relaxed font-normal">
-                <Info className="w-4.5 h-4.5 shrink-0 text-indigo-400 mt-0.5" />
+              <div className="bg-[#FF7F11]/10 rounded-2xl p-4 border border-[#FF7F11]/20 flex items-start gap-2.5 text-xs text-orange-200/90 leading-relaxed font-normal">
+                <Info className="w-4.5 h-4.5 shrink-0 text-[#FF7F11] mt-0.5" />
                 <div>
-                  Запуск рассылки отправит запрос <code className="text-indigo-300 font-mono font-bold text-[10px]">POST /api/mailing</code> на бэкенд FastAPI. Рассылка будет выполняться в фоне на стороне VPS, не блокируя работу интерфейса.
+                  Запуск рассылки отправит запрос <code className="text-orange-300 font-mono font-bold text-[10px]">POST /api/mailing</code> на бэкенд FastAPI. Рассылка будет выполняться в фоне на стороне VPS, не блокируя работу интерфейса.
                 </div>
               </div>
 
@@ -509,7 +509,7 @@ export default function MailingModal({ users, onClose, useRealApi = false, isRea
                 </button>
                 <button
                   type="submit"
-                  className="w-2/3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md border border-white/10 cursor-pointer active:scale-[0.98]"
+                  className="w-2/3 bg-gradient-to-r from-[#FF7F11] to-amber-500 hover:from-[#E06A0B] hover:to-amber-600 text-white font-semibold py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shadow-md shadow-orange-500/10 border border-[#FF7F11]/20 cursor-pointer active:scale-[0.98]"
                 >
                   <Send className="w-3.5 h-3.5" />
                   Запустить рассылку

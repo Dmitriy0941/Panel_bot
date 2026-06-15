@@ -10,7 +10,7 @@ export function getApiBaseUrl(): string {
   const customUrl = localStorage.getItem("custom_api_url");
   if (customUrl) return customUrl.trim();
   const env = (import.meta as any).env || {};
-  return (env.VITE_API_BASE_URL || "https://api.antonovdv.ru").trim();
+  return (env.VITE_API_BASE_URL || window.location.origin).trim();
 }
 
 // Update base URL
@@ -76,9 +76,9 @@ async function apiRequest(path: string, options: RequestInit = {}): Promise<any>
     ...(options.headers || {}),
   } as any;
 
-  // 10 seconds timeout
+  // 15 seconds timeout
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     const res = await fetch(url, {
@@ -124,7 +124,7 @@ async function apiRequest(path: string, options: RequestInit = {}): Promise<any>
 export async function testConnection(url: string = getApiBaseUrl()): Promise<boolean> {
   const targetUrl = url.replace(/\/$/, "");
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 4000);
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
 
   try {
     // Ping openapi or docs since they don't require authorization
